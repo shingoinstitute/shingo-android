@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="16dp" android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:divider="?android:dividerHorizontal"
+        android:showDividers="middle"
+        android:dividerPadding="5dp">
+        <TextView
+            android:id="@+id/sorganization_website"
+            android:textSize="8pt"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:autoLink="web"
+            style="?android:attr/textAppearanceLarge"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"/>
+        <TextView
+            android:id="@+id/sorganization_email"
+            android:textSize="8pt"
+            android:textStyle="bold"
+            android:autoLink="email"
+            android:layout_width="wrap_content"
+            style="?android:attr/textAppearanceLarge"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/sorganization_summary"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textIsSelectable="true"/>
+
+</LinearLayout>
