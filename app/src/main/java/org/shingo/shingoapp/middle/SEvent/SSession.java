@@ -8,7 +8,9 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
 import org.shingo.shingoapp.middle.SObject;
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,18 +47,23 @@ public class SSession extends SObject implements Comparable<SObject> {
         super.fromJSON(json);
         try {
             JSONObject jsonSession = new JSONObject(json);
-            this.summary = jsonSession.getString("Summary").equals("null") ? null : jsonSession.getString("Summary");
-            this.room = new SRoom();
-            this.room.fromJSON(jsonSession.getJSONObject("Room").toString());
-            this.start = formatDateTimeString(jsonSession.getString("Start"));
-            this.end = formatDateTimeString(jsonSession.getString("End"));
-            JSONArray jSpeakers = jsonSession.getJSONArray("Speakers");
-            for(int i = 0; i < jSpeakers.length(); i++){
-                SPerson speaker = new SPerson();
-                speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
-                speakers.add(speaker);
+            this.name = (jsonSession.getString("Session_Display_Name__c").equals("null") ? "Session" : jsonSession.getString("Session_Display_Name__c"));
+            if(jsonSession.has("Summary__c")) {
+                this.summary = jsonSession.getString("Summary__c").equals("null") ? null : jsonSession.getString("Summary__c");
             }
-            this.type = SSessionType.valueOf(jsonSession.getString("Type"));
+            if(jsonSession.has("Room__r")) {
+                this.room = new SRoom();
+                this.room.fromJSON(jsonSession.getJSONObject("Room__r").toString());
+            }
+            this.start = formatDateTimeString(jsonSession.getString("Start_Date_Time__c"));
+            this.end = formatDateTimeString(jsonSession.getString("End_Date_Time__c"));
+//            JSONArray jSpeakers = jsonSession.getJSONArray("Speakers");
+//            for(int i = 0; i < jSpeakers.length(); i++){
+//                SPerson speaker = new SPerson();
+//                speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
+//                speakers.add(speaker);
+//            }
+            this.type = (jsonSession.getString("Session_Type__c").equals("null") ? SSessionType.Concurrent : SSessionType.valueOf(jsonSession.getString("Session_Type__c").replaceAll("\\s", "")));
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
@@ -102,12 +109,21 @@ public class SSession extends SObject implements Comparable<SObject> {
         return compareStart;
     }
 
+    public String getTimeString() {
+        String timeString = "";
+        DateFormat formatter = SimpleDateFormat.getTimeInstance();
+        timeString += formatter.format(start) + " - " + formatter.format(end);
+        return timeString;
+    }
+
     public enum SSessionType{
         Keynote("Keynote"),
         Concurrent("Concurrent"),
         Offsite("Off-site"),
-        HalfDayWorkshop("Half-day Workshop"),
-        FullDayWorkshop("Full-day Workshop"),
+        Tour("Tour"),
+        Meal("Meal"),
+        HalfDayWorkshop("Half Day Workshop"),
+        FullDayWorkshop("Full Day Workshop"),
         Social("Social");
 
         private String type;

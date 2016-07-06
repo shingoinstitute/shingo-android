@@ -33,6 +33,18 @@ public class SEvent extends SObject implements Comparable<SObject> {
 
     public SEvent(){}
 
+    public SEvent(String id, String name, String start, String end){
+        this.id = id;
+        this.name = name;
+        try {
+            this.start = formatDateString(start);
+            this.end = formatDateString(end);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public SEvent(String id, String name, Date start, Date end, String registration,
                   SVenue venue, String displayLocation, String city, String country, String primaryColor, List<SDay> agenda){
         super(id, name);

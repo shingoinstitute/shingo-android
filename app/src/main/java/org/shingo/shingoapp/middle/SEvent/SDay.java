@@ -42,13 +42,13 @@ public class SDay extends SObject implements Comparable<SObject> {
         try {
             JSONObject jsonDay = new JSONObject(json);
             this.name = jsonDay.getString("Display_Name__c");
-            formatDateString(jsonDay.getString("Date"));
-            JSONArray jSessions = jsonDay.getJSONArray("Sessions");
-            for(int i = 0; i < jSessions.length(); i++){
-                SSession session = new SSession();
-                session.fromJSON(jSessions.getJSONObject(i).toString());
-                sessions.add(session);
-            }
+            formatDateString(jsonDay.getString("Agenda_Date__c"));
+//            JSONArray jSessions = jsonDay.getJSONArray("Sessions");
+//            for(int i = 0; i < jSessions.length(); i++){
+//                SSession session = new SSession();
+//                session.fromJSON(jSessions.getJSONObject(i).toString());
+//                sessions.add(session);
+//            }
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
@@ -58,6 +58,9 @@ public class SDay extends SObject implements Comparable<SObject> {
     public int compareTo(@NonNull SObject a){
         if(!(a instanceof SDay))
             throw new ClassCastException(a.getName() + " is not a SDay");
+        if(((SDay) a).getDate() == null){
+            return 0;
+        }
         int compareDate = this.date.compareTo(((SDay) a).getDate());
         if(compareDate == 0)
             return this.name.compareTo(a.getName());

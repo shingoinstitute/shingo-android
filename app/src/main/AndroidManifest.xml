@@ -27,6 +27,24 @@
         <activity
             android:name=".ui.ModelActivity"
             android:label="Shingo Model" />
+        <activity
+            android:name=".ui.events.EventListActivity"
+            android:label="@string/title_activity_events_list"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.shingo.shingoapp.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.events.EventDetailActivity"
+            android:label="@string/title_activity_event_detail"
+            android:parentActivityName=".ui.events.EventListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.shingo.shingoapp.ui.events.EventListActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -22,7 +22,7 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
     private OnTaskComplete mListener;
     private static boolean isWorking = false;
     private final static Object mutex = new Object();
-    private final static String API_URL = "https://api.shingo.org/";
+    private final static String API_URL = "https://api.shingo.org";
     String output;
 
     /**
@@ -101,6 +101,7 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
             System.out.println("GetAsyncData completed");
             mListener.onTaskComplete(output);
         } else {
+            mListener.onTaskError("An error occurred getting data...");
             System.out.println("An error occurred in GetAsyncData...");
         }
     }

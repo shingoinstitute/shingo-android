@@ -17,4 +17,6 @@ public interface OnTaskComplete {
      * @param response A JSON string to parse
      */
     void onTaskComplete(String response);
+
+    void onTaskError(String error);
 }

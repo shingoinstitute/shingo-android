@@ -62,7 +62,7 @@ public abstract class SObject implements Comparable<SObject> {
     }
 
     protected Date formatDateTimeString(String dateTime) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS", Locale.getDefault());
         return format.parse(dateTime);
     }
 

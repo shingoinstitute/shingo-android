@@ -9,6 +9,7 @@ import android.view.View;
 import com.crashlytics.android.Crashlytics;
 
 import org.shingo.shingoapp.R;
+import org.shingo.shingoapp.ui.events.EventListActivity;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -22,17 +23,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        Button events = (Button) findViewById(R.id.action_events);
-//        events.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Bundle args = new Bundle();
-//                String[] params = { "/sfevents" };
-//                args.putStringArray("params", params);
-//                startActivity(EventListActivity.class, args);
-//            }
-//        });
-//
+        (findViewById(R.id.action_events)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(EventListActivity.class, new Bundle());
+            }
+        });
+
         (findViewById(R.id.action_model)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
