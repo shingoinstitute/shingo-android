@@ -1,5 +1,6 @@
 package org.shingo.shingoapp.ui.events;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -17,22 +18,27 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.middle.SEntity.SPerson;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.middle.SEvent.SSession;
+import org.shingo.shingoapp.ui.ModelActivity;
 
 public class EventDetailActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnTaskComplete, AgendaFragment.OnAgendaFragmentInteractionListener, SessionFragment.OnSessionListFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnTaskComplete,
+        AgendaFragment.OnAgendaFragmentInteractionListener, SessionFragment.OnSessionListFragmentInteractionListener,
+        SpeakerFragment.OnSpeakerListFragmentInteractionListener {
 
     private SEvent mEvent;
     private ProgressDialog progress;
     private NavigationView navigationView;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         String id = getIntent().getExtras().getString("event_id");
@@ -109,16 +115,26 @@ public class EventDetailActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.event_detail, fragment)
                     .commit();
-        } else if (id == R.id.nav_speaker) {
-
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_sessions) {
+            SessionFragment fragment = SessionFragment.newInstance(mEvent.getId(),"event_id");
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.event_detail, fragment)
+                    .commit();
+        } else if (id == R.id.nav_speakers) {
+            SpeakerFragment fragment = SpeakerFragment.newInstance(mEvent.getId(),"event_id");
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.event_detail, fragment)
+                    .commit();
+        } else if (id == R.id.nav_login) {
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if(id == R.id.nav_events){
+            startActivity(new Intent(this, EventListActivity.class));
+        } else if(id == R.id.nav_model){
+            startActivity(new Intent(this, ModelActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -143,6 +159,7 @@ public class EventDetailActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+        toolbar.setTitle(mEvent.getName());
         onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_agenda));
 
         progress.dismiss();
@@ -156,16 +173,29 @@ public class EventDetailActivity extends AppCompatActivity
     @Override
     public void onListFragmentInteraction(SDay day) {
         if(day != null){
-            SessionFragment fragment = SessionFragment.newInstance(day.getId());
+            SessionFragment fragment = SessionFragment.newInstance(day.getId(), "agenda_id");
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.event_detail, fragment)
                     .commit();
+
+            navigationView.getMenu().findItem(R.id.nav_sessions).setChecked(true);
         }
     }
 
     @Override
     public void onListFragmentInteraction(SSession item) {
+        SpeakerFragment fragment = SpeakerFragment.newInstance(item.getId(), "session_id");
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.event_detail, fragment)
+                .commit();
+
+        navigationView.getMenu().findItem(R.id.nav_speakers).setChecked(true);
+    }
+
+    @Override
+    public void onListFragmentInteraction(SPerson person) {
 
     }
 }

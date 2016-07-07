@@ -17,9 +17,8 @@ import java.net.URL;
  */
 public abstract class SEntity extends SObject {
     protected Bitmap image;
+    private String imageUrl;
     protected String summary;
-
-    public boolean is_loading = false;
 
     public SEntity(){}
 
@@ -28,6 +27,10 @@ public abstract class SEntity extends SObject {
         this.summary = summary;
         this.image = image;
     }
+
+    public void setImage(Bitmap image) { this.image = image; }
+
+    public String getImageUrl() { return imageUrl; }
 
     public Bitmap getImage(){
         return image;
@@ -42,10 +45,12 @@ public abstract class SEntity extends SObject {
         super.fromJSON(json);
         try {
             JSONObject jsonEntity = new JSONObject(json);
-            summary = (jsonEntity.getString("Summary").equals("null") ? null : jsonEntity.getString("Summary"));
-            getImageFromURL(jsonEntity.getString("Image").equals("null") ?
-                    "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png"
-                    : jsonEntity.getString("Image"));
+            if(jsonEntity.has("Picture_URL__c"))
+                this.imageUrl = (jsonEntity.isNull("Picture_URL__c")? "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png" : jsonEntity.getString("Picture_URL__c"));
+            if(jsonEntity.has("Summary__c"))
+                this.summary = (jsonEntity.isNull("Summary__c") ? "Summary coming soon!" : jsonEntity.getString("Summary__c"));
+            else if(jsonEntity.has("Speaker_Biography__c"))
+                this.summary = (jsonEntity.isNull("Speaker_Biography__c") ? "Bio coming soon!" : jsonEntity.getString("Speaker_Biography__c"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -54,23 +59,6 @@ public abstract class SEntity extends SObject {
     public abstract String getDetail();
 
     public abstract View getContent(Context context);
-
-    protected void getImageFromURL(final String urlString){
-        is_loading = true;
-        Thread thread = new Thread(){
-            @Override
-            public void run(){
-                try {
-                    URL url = new URL(urlString);
-                    image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    is_loading = false;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        thread.start();
-    }
 
     protected abstract void getTypeFromString(String type);
 }

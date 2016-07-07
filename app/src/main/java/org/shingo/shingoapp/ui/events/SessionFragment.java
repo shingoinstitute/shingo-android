@@ -19,6 +19,7 @@ import org.shingo.shingoapp.data.OnTaskComplete;
 import org.shingo.shingoapp.middle.SEvent.SSession;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,12 +30,13 @@ import java.util.List;
  */
 public class SessionFragment extends Fragment implements OnTaskComplete{
 
-    private static final String ARG_DAY_ID = "column-count";
-    private String mDayId = "";
+    private String ARG_ID = "";
+    private String mId = "";
     private OnSessionListFragmentInteractionListener mListener;
     private List<SSession> mSessions;
 
-    private RecyclerView recyclerView;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
 
     /**
@@ -44,12 +46,11 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     public SessionFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static SessionFragment newInstance(String dayId) {
+    public static SessionFragment newInstance(String id, String ARG_TYPE) {
         SessionFragment fragment = new SessionFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_DAY_ID, dayId);
+        args.putString(ARG_TYPE, id);
+        args.putString("type", ARG_TYPE);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,7 +60,8 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mDayId = getArguments().getString(ARG_DAY_ID);
+            ARG_ID = getArguments().getString("type");
+            mId = getArguments().getString(ARG_ID);
         }
     }
 
@@ -72,10 +74,12 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            mRecyclerView = (RecyclerView) view;
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+            mAdapter = new MySessionRecyclerViewAdapter(mSessions, mListener);
+            mRecyclerView.setAdapter(mAdapter);
             GetAsyncData getSessionsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/sessions/", "agenda_id=" + mDayId};
+            String[] params = {"/salesforce/events/sessions/", ARG_ID + "=" + mId};
             getSessionsAsync.execute(params);
             progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
         }
@@ -120,8 +124,8 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        recyclerView.setAdapter(new MySessionRecyclerViewAdapter(mSessions, mListener));
+        Collections.sort(mSessions);
+        mAdapter.notifyDataSetChanged();
         progress.dismiss();
     }
 

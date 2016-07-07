@@ -5,9 +5,10 @@
     <string name="action_events">Upcoming Events</string>
     <string name="action_model">Shingo Model</string>
     <string name="action_support">Support</string>
-    <string name="title_activity_events_list">EventsListActivity</string>
-    <string name="title_activity_event_detail">EventDetailActivity</string>
+    <string name="title_activity_events_list">Upcoming Events</string>
+    <string name="title_activity_event_detail">Event Etail</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_summary">Summary</string>
 </resources>

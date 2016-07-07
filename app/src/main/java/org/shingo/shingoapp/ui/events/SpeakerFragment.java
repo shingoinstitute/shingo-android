@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskComplete;
-import org.shingo.shingoapp.middle.SEvent.SDay;
+import org.shingo.shingoapp.middle.SEntity.SPerson;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,33 +25,30 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnAgendaFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnSpeakerListFragmentInteractionListener}
  * interface.
  */
-public class AgendaFragment extends Fragment implements OnTaskComplete {
+public class SpeakerFragment extends Fragment implements OnTaskComplete {
 
-    private static final String ARG_EVENT_ID = "event_id";
-    private String mEventId;
-    private OnAgendaFragmentInteractionListener mListener;
-    private RecyclerView mRecyclerView;
+    private String ARG_ID = "";
+    private String mId = "";
+    private OnSpeakerListFragmentInteractionListener mListener;
+    private List<SPerson> mSpeakers;
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
-
-    private List<SDay> mDays;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public AgendaFragment() {
+    public SpeakerFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static AgendaFragment newInstance(String mEventId) {
-        AgendaFragment fragment = new AgendaFragment();
+    public static SpeakerFragment newInstance(String id, String type) {
+        SpeakerFragment fragment = new SpeakerFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_EVENT_ID, mEventId);
+        args.putString("type", type);
+        args.putString(type, id);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,28 +58,32 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mEventId = getArguments().getString(ARG_EVENT_ID);
+            ARG_ID = getArguments().getString("type");
+            mId = getArguments().getString(ARG_ID);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_agenda_list, container, false);
-        mDays = new ArrayList<>();
+        View view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            mRecyclerView = (RecyclerView) view;
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-            GetAsyncData getDaysAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/days", "event_id=" + mEventId};
-            getDaysAsync.execute(params);
-            mAdapter = new MyAgendaRecyclerViewAdapter(mDays, mListener);
-            mRecyclerView.setAdapter(mAdapter);
+            mSpeakers = new ArrayList<>();
+            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            mAdapter = new MySpeakerRecyclerViewAdapter(mSpeakers, mListener);
+            recyclerView.setAdapter(mAdapter);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading agenda...");
+            GetAsyncData getSpeakersAsync = new GetAsyncData(this);
+            String[] params = {"/salesforce/events/speakers", ARG_ID + "=" + mId};
+            getSpeakersAsync.execute(params);
+
+            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
         }
+
         return view;
     }
 
@@ -90,11 +91,11 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnAgendaFragmentInteractionListener) {
-            mListener = (OnAgendaFragmentInteractionListener) context;
+        if (context instanceof OnSpeakerListFragmentInteractionListener) {
+            mListener = (OnSpeakerListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnAgendaFragmentInteractionListener");
+                    + " must implement OnSpeakerListFragmentInteractionListener");
         }
     }
 
@@ -106,7 +107,7 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskComplete() {
-        throw new UnsupportedOperationException("This callback is not implemented...");
+
     }
 
     @Override
@@ -114,18 +115,20 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                JSONArray jDays = result.getJSONArray("days");
-                for(int i = 0; i < jDays.length(); i++){
-                    SDay day = new SDay();
-                    day.fromJSON(jDays.getJSONObject(i).toString());
-                    mDays.add(day);
+                JSONArray jSpeakers = result.getJSONArray("speakers");
+                for(int i = 0; i < jSpeakers.length(); i++){
+                    SPerson speaker = new SPerson();
+                    speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
+                    mSpeakers.add(speaker);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mDays);
+
+        Collections.sort(mSpeakers);
         mAdapter.notifyDataSetChanged();
+
         progress.dismiss();
     }
 
@@ -144,8 +147,7 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnAgendaFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(SDay day);
+    public interface OnSpeakerListFragmentInteractionListener {
+        void onListFragmentInteraction(SPerson person);
     }
 }

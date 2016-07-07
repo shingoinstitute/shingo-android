@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * This class holds data for
@@ -49,7 +50,7 @@ public class SSession extends SObject implements Comparable<SObject> {
             JSONObject jsonSession = new JSONObject(json);
             this.name = (jsonSession.getString("Session_Display_Name__c").equals("null") ? "Session" : jsonSession.getString("Session_Display_Name__c"));
             if(jsonSession.has("Summary__c")) {
-                this.summary = jsonSession.getString("Summary__c").equals("null") ? null : jsonSession.getString("Summary__c");
+                this.summary = jsonSession.getString("Summary__c").equals("null") ? "Summary coming soon!" : jsonSession.getString("Summary__c");
             }
             if(jsonSession.has("Room__r")) {
                 this.room = new SRoom();

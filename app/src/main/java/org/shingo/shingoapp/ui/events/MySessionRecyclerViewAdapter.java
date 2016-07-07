@@ -1,9 +1,14 @@
 package org.shingo.shingoapp.ui.events;
 
+import android.animation.ValueAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.shingo.shingoapp.R;
@@ -35,11 +40,21 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        final int originalHeight;
+        originalHeight = holder.mView.getHeight();
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(mValues.get(position).getName());
         holder.mTimeView.setText(mValues.get(position).getTimeString());
+        holder.mSummaryView.setText(Html.fromHtml(mValues.get(position).getSummary()));
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.mLabelView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
+            }
+        });
+
+        holder.mSpeakersView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
@@ -60,6 +75,10 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         public final View mView;
         public final TextView mTitleView;
         public final TextView mTimeView;
+        public final TextView mLabelView;
+        public final TextView mSummaryView;
+        public final ImageView mSpeakersView;
+
         public SSession mItem;
 
         public ViewHolder(View view) {
@@ -67,6 +86,9 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.session_title);
             mTimeView = (TextView) view.findViewById(R.id.session_time);
+            mLabelView = (TextView) view.findViewById(R.id.summary_label);
+            mSummaryView = (TextView) view.findViewById(R.id.session_summary);
+            mSpeakersView = (ImageView) view.findViewById(R.id.session_speakers);
         }
 
         @Override

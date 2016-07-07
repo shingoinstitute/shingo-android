@@ -53,6 +53,10 @@ public class EventListActivity extends AppCompatActivity implements OnTaskComple
 
         progress = ProgressDialog.show(this, "", "Loading Events", true);
 
+
+        mAdapter = new MyAdapter(mEvents);
+        mRecyclerView.setAdapter(mAdapter);
+
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -85,8 +89,8 @@ public class EventListActivity extends AppCompatActivity implements OnTaskComple
             e.printStackTrace();
         }
 
-        mAdapter = new MyAdapter(mEvents);
-        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+        
         progress.dismiss();
     }
 

@@ -42,7 +42,7 @@ public class SDay extends SObject implements Comparable<SObject> {
         try {
             JSONObject jsonDay = new JSONObject(json);
             this.name = jsonDay.getString("Display_Name__c");
-            formatDateString(jsonDay.getString("Agenda_Date__c"));
+            this.date = formatDateString(jsonDay.getString("Agenda_Date__c"));
 //            JSONArray jSessions = jsonDay.getJSONArray("Sessions");
 //            for(int i = 0; i < jSessions.length(); i++){
 //                SSession session = new SSession();

@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * This is the base class for all Shingo SF Objects.
@@ -63,11 +64,13 @@ public abstract class SObject implements Comparable<SObject> {
 
     protected Date formatDateTimeString(String dateTime) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS", Locale.getDefault());
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.parse(dateTime);
     }
 
     protected Date formatDateString(String dateTime) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.parse(dateTime);
     }
 

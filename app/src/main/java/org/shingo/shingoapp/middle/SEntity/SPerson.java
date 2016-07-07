@@ -61,9 +61,11 @@ public class SPerson extends SEntity implements Comparable<SObject> {
         super.fromJSON(json);
         try {
             JSONObject jPerson = new JSONObject(json);
-            title = (jPerson.getString("Title").equals("null") ? null : jPerson.getString("Title"));
-            company = (jPerson.getString("Company").equals("null") ? null : jPerson.getString("Company"));
-            getTypeFromString(jPerson.getString("Type"));
+            title = (jPerson.isNull("Speaker_Title__c") ? null : jPerson.getString("Speaker_Title__c"));
+            if(!jPerson.isNull("Organization__r"))
+                company = jPerson.getJSONObject("Organization__r").getString("Name");
+            else
+                company = "";
         } catch (JSONException e) {
             e.printStackTrace();
         }
