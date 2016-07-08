@@ -36,6 +36,7 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
     private List<SPerson> mSpeakers;
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
+    private View view;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -66,23 +67,20 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
+        view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
 
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            mSpeakers = new ArrayList<>();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            mAdapter = new MySpeakerRecyclerViewAdapter(mSpeakers, mListener);
-            recyclerView.setAdapter(mAdapter);
+        Context context = view.getContext();
+        mSpeakers = new ArrayList<>();
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        mAdapter = new MySpeakerRecyclerViewAdapter(mSpeakers, mListener);
+        recyclerView.setAdapter(mAdapter);
 
-            GetAsyncData getSpeakersAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/speakers", ARG_ID + "=" + mId};
-            getSpeakersAsync.execute(params);
+        GetAsyncData getSpeakersAsync = new GetAsyncData(this);
+        String[] params = {"/salesforce/events/speakers", ARG_ID + "=" + mId};
+        getSpeakersAsync.execute(params);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
-        }
+        progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
 
         return view;
     }
@@ -128,6 +126,10 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
 
         Collections.sort(mSpeakers);
         mAdapter.notifyDataSetChanged();
+
+        if(mSpeakers.size() == 0){
+            (view.findViewById(R.id.empty_speakers)).setVisibility(View.VISIBLE);
+        }
 
         progress.dismiss();
     }

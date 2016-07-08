@@ -43,10 +43,14 @@ public class MySpeakerRecyclerViewAdapter extends RecyclerView.Adapter<MySpeaker
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        (holder.mView.findViewById(R.id.person_container)).setOnClickListener(new View.OnClickListener() {
+        (holder.mView.findViewById(R.id.expand_person)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
+                if(holder.mSummaryView.getVisibility() == View.VISIBLE)
+                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_less);
+                else
+                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_more);
             }
         });
         holder.mItem = mValues.get(position);

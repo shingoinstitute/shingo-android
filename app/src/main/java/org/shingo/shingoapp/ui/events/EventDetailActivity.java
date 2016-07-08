@@ -107,6 +107,7 @@ public class EventDetailActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        if(item == null) return false;
         int id = item.getItemId();
 
         if (id == R.id.nav_agenda) {
@@ -178,8 +179,6 @@ public class EventDetailActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.event_detail, fragment)
                     .commit();
-
-            navigationView.getMenu().findItem(R.id.nav_sessions).setChecked(true);
         }
     }
 
@@ -190,8 +189,6 @@ public class EventDetailActivity extends AppCompatActivity
         fragmentManager.beginTransaction()
                 .replace(R.id.event_detail, fragment)
                 .commit();
-
-        navigationView.getMenu().findItem(R.id.nav_speakers).setChecked(true);
     }
 
     @Override

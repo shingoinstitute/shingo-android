@@ -40,17 +40,19 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final int originalHeight;
-        originalHeight = holder.mView.getHeight();
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(mValues.get(position).getName());
         holder.mTimeView.setText(mValues.get(position).getTimeString());
         holder.mSummaryView.setText(Html.fromHtml(mValues.get(position).getSummary()));
 
-        holder.mLabelView.setOnClickListener(new View.OnClickListener() {
+        holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
+                if(holder.mSummaryView.getVisibility() == View.VISIBLE)
+                    ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(R.drawable.ic_expand_less);
+                else
+                    ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(R.drawable.ic_expand_more);
             }
         });
 
@@ -75,7 +77,7 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         public final View mView;
         public final TextView mTitleView;
         public final TextView mTimeView;
-        public final TextView mLabelView;
+        public final ImageView mExpandView;
         public final TextView mSummaryView;
         public final ImageView mSpeakersView;
 
@@ -86,7 +88,7 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.session_title);
             mTimeView = (TextView) view.findViewById(R.id.session_time);
-            mLabelView = (TextView) view.findViewById(R.id.summary_label);
+            mExpandView = (ImageView) view.findViewById(R.id.expand_session);
             mSummaryView = (TextView) view.findViewById(R.id.session_summary);
             mSpeakersView = (ImageView) view.findViewById(R.id.session_speakers);
         }
