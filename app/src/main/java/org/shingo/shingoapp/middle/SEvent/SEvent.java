@@ -1,18 +1,24 @@
 package org.shingo.shingoapp.middle.SEvent;
 
 import android.support.annotation.NonNull;
+import android.text.format.DateUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
+import org.shingo.shingoapp.middle.SEntity.SSponsor;
 import org.shingo.shingoapp.middle.SObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class holds data for
@@ -29,24 +35,17 @@ public class SEvent extends SObject implements Comparable<SObject> {
     private String city;
     private String country;
     private String primaryColor;
-    private List<SDay> agenda = new ArrayList<>();
+    private Map<String,SDay> agenda = new HashMap<>();
+    private List<SPerson> speakers = new ArrayList<>();
+    private List<SOrganization> exhibitors = new ArrayList<>();
+    private List<SSponsor> sponsors = new ArrayList<>();
+    private Date lastDataPull = new Date();
+    private static final long TIME_OUT = TimeUnit.MINUTES.toMillis(15);
 
     public SEvent(){}
 
-    public SEvent(String id, String name, String start, String end){
-        this.id = id;
-        this.name = name;
-        try {
-            this.start = formatDateString(start);
-            this.end = formatDateString(end);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     public SEvent(String id, String name, Date start, Date end, String registration,
-                  SVenue venue, String displayLocation, String city, String country, String primaryColor, List<SDay> agenda){
+                  SVenue venue, String displayLocation, String city, String country, String primaryColor, List<SDay> agenda, List<SPerson> speakers){
         super(id, name);
         this.start = start;
         this.end = end;
@@ -56,7 +55,10 @@ public class SEvent extends SObject implements Comparable<SObject> {
         this.city = city;
         this.country = country;
         this.primaryColor = primaryColor;
-        this.agenda = agenda;
+        for(SDay day : agenda){
+            this.agenda.put(day.getId(), day);
+        }
+        this.speakers = speakers;
     }
 
     public Date getStart(){
@@ -75,13 +77,29 @@ public class SEvent extends SObject implements Comparable<SObject> {
         return venue;
     }
 
-    public List<SDay> getAgenda(){
+    public String getDisplayLocation() {
+        return displayLocation;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getPrimaryColor() {
+        return primaryColor;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public Map<String, SDay> getAgenda(){
         return agenda;
     }
 
     public List<SSession> getSessions(){
         List<SSession> sessions = new ArrayList<>();
-        for(SDay day : agenda){
+        for(SDay day : agenda.values()){
             sessions.addAll(day.getSessions());
         }
 
@@ -91,16 +109,15 @@ public class SEvent extends SObject implements Comparable<SObject> {
     }
 
     public List<SPerson> getSpeakers(){
-        List<SPerson> speakers = new ArrayList<>();
-        for(SDay day : agenda){
-            for(SSession session : day.getSessions()){
-                speakers.addAll(session.getSpeakers());
-            }
-        }
-
-        Collections.sort(speakers);
-
         return speakers;
+    }
+
+    public List<SOrganization> getExhibitors() {
+        return exhibitors;
+    }
+
+    public List<SSponsor> getSponsors() {
+        return sponsors;
     }
 
     @Override
@@ -123,24 +140,41 @@ public class SEvent extends SObject implements Comparable<SObject> {
         super.fromJSON(json);
         try {
             JSONObject jsonEvent = new JSONObject(json);
-            this.start = formatDateString(jsonEvent.getString("Start_Date__c"));
-            this.end = formatDateString(jsonEvent.getString("End_Date__c"));
-            this.registration = (jsonEvent.getString("Registration_Link__c").equals("null") ? "http://events.shingo.org" : jsonEvent.getString("Registration_Link__c"));
-            this.venue = new SVenue();
-            this.displayLocation = (jsonEvent.getString("Display_Location__c").equals("null") ? "" : jsonEvent.getString("Display_Location__c"));
-            this.city = (jsonEvent.getString("Host_City__c").equals("null") ? "" : jsonEvent.getString("Host_City__c"));
-            this.country = (jsonEvent.getString("Host_Country__c").equals("null") ? "" : jsonEvent.getString("Host_Country__c"));
-            this.primaryColor = (jsonEvent.getString("Primary_Color__c").equals("null") ? "#640921" : jsonEvent.getString("Primary_Color__c"));
-            JSONArray jDays = jsonEvent.getJSONObject("Shingo_Day_Agendas__r").getJSONArray("records");
-            for(int i = 0; i < jDays.length(); i++){
-                SDay day = new SDay();
-                day.fromJSON(jDays.getJSONObject(i).toString());
-                agenda.add(day);
-            }
+            if(jsonEvent.has("Start_Date__c"))
+                this.start = formatDateString(jsonEvent.getString("Start_Date__c"));
+            if(jsonEvent.has("End_Date__c"))
+                this.end = formatDateString(jsonEvent.getString("End_Date__c"));
+            if(jsonEvent.has("Registration_Link__c"))
+                this.registration = (jsonEvent.isNull("Registration_Link__c") ? "http://events.shingo.org" : jsonEvent.getString("Registration_Link__c"));
 
-            Collections.sort(agenda);
+            this.venue = new SVenue();
+            if(jsonEvent.has("Display_Location__c"))
+                this.displayLocation = (jsonEvent.isNull("Display_Location__c") ? "" : jsonEvent.getString("Display_Location__c"));
+            if(jsonEvent.has("Host_City__c"))
+                this.city = (jsonEvent.isNull("Host_City__c") ? "" : jsonEvent.getString("Host_City__c"));
+            if(jsonEvent.has("Host_Country__c"))
+                this.country = (jsonEvent.isNull("Host_Country__c") ? "" : jsonEvent.getString("Host_Country__c"));
+            if(jsonEvent.has("Primary_Color__c"))
+                this.primaryColor = (jsonEvent.getString("Primary_Color__c").equals("null") ? "#640921" : jsonEvent.getString("Primary_Color__c"));
+            if(jsonEvent.has("Shingo_Day_Agendas__r")) {
+                JSONArray jDays = jsonEvent.getJSONObject("Shingo_Day_Agendas__r").getJSONArray("records");
+                for (int i = 0; i < jDays.length(); i++) {
+                    SDay day = new SDay();
+                    day.fromJSON(jDays.getJSONObject(i).toString());
+                    agenda.put(day.getId(),day);
+                }
+            }
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean needsUpdated(){
+        Date now = new Date();
+        return now.after(new Date(lastDataPull.getTime() + TIME_OUT));
+    }
+
+    public void updatePullTime(){
+        lastDataPull = new Date();
     }
 }

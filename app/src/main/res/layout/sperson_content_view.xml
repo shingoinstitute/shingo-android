@@ -28,6 +28,7 @@
                 android:layout_marginRight="5dp" />
             <LinearLayout
                 android:orientation="vertical"
+                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <TextView
@@ -42,10 +43,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+            <ImageView
+                android:id="@+id/expand_person"
+                android:src="@drawable/ic_expand_more"
+                android:layout_gravity="bottom|right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </LinearLayout>
         <TextView
             android:id="@+id/person_bio"
             android:visibility="gone"
+            android:padding="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true" />

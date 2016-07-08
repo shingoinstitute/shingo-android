@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/event_menu" android:title="Event Details" android:visible="false">
+            <menu>
+                <item
+                    android:id="@+id/nav_agenda"
+                    android:icon="@drawable/ic_view_agenda"
+                    android:title="Agenda" />
+                <item
+                    android:id="@+id/nav_sessions"
+                    android:icon="@drawable/ic_event_seat"
+                    android:title="Sessions" />
+                <item
+                    android:id="@+id/nav_speakers"
+                    android:icon="@drawable/ic_person"
+                    android:title="Speakers" />
+            </menu>
+        </item>
+        <item android:title="Shingo App">
+            <menu>
+                <item
+                    android:id="@+id/nav_events"
+                    android:icon="@drawable/ic_event"
+                    android:title="Upcoming Events" />
+                <item
+                    android:id="@+id/nav_model"
+                    android:icon="@drawable/ic_content_copy"
+                    android:title="Shingo Model" />
+                <item
+                    android:id="@+id/nav_support"
+                    android:icon="@drawable/ic_bug_report"
+                    android:title="Support" />
+            </menu>
+        </item>
+        <item android:title="Account">
+            <menu>
+                <item
+                    android:id="@+id/nav_login"
+                    android:icon="@drawable/ic_account_box"
+                    android:title="Login" />
+                <item
+                    android:id="@+id/nav_manage"
+                    android:icon="@drawable/ic_menu_manage"
+                    android:title="Settings" />
+            </menu>
+        </item>
+    </group>
+</menu>

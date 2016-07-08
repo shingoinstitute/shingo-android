@@ -16,43 +16,40 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskComplete;
-import org.shingo.shingoapp.middle.SEvent.SSession;
+import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.ui.MainActivity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnSessionListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnEventListFragmentInteractionListener}
  * interface.
  */
-public class SessionFragment extends Fragment implements OnTaskComplete{
+public class EventFragment extends Fragment implements OnTaskComplete {
 
-    private String ARG_ID = "";
-    private String mId = "";
-    private OnSessionListFragmentInteractionListener mListener;
-    private List<SSession> mSessions;
-
-    private RecyclerView mRecyclerView;
+    private static final String ARG_COLUMN_COUNT = "column-count";
+    private int mColumnCount = 1;
+    private OnEventListFragmentInteractionListener mListener;
+    private MainActivity mainActivity;
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
-    private MainActivity mainActivity;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SessionFragment() {
+    public EventFragment() {
     }
 
-    public static SessionFragment newInstance(String id, String ARG_TYPE) {
-        SessionFragment fragment = new SessionFragment();
+    // TODO: Customize parameter initialization
+    @SuppressWarnings("unused")
+    public static EventFragment newInstance(int columnCount) {
+        EventFragment fragment = new EventFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_TYPE, id);
-        args.putString("type", ARG_TYPE);
+        args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,31 +57,32 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mainActivity = (MainActivity)getActivity();
+        mainActivity.setTitle("Upcoming Events");
         if (getArguments() != null) {
-            ARG_ID = getArguments().getString("type");
-            mId = getArguments().getString(ARG_ID);
+            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_session_list, container, false);
-        mainActivity = (MainActivity)getActivity();
-        mainActivity.setTitle("Sessions");
-        mSessions = new ArrayList<>();
+        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            mRecyclerView = (RecyclerView) view;
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-            mAdapter = new MySessionRecyclerViewAdapter(mSessions, mListener);
-            mRecyclerView.setAdapter(mAdapter);
-            GetAsyncData getSessionsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/sessions/", ARG_ID + "=" + mId};
-            getSessionsAsync.execute(params);
-            progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
+            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            mAdapter = new MyEventRecyclerViewAdapter(mainActivity.mEvents.values(), mListener);
+            recyclerView.setAdapter(mAdapter);
+
+            GetAsyncData getEventsAsync = new GetAsyncData(this);
+            String[] params = {"/salesforce/events"};
+            getEventsAsync.execute(params);
+
+
+            progress = ProgressDialog.show(getContext(), "", "Loading Events", true);
         }
         return view;
     }
@@ -93,11 +91,11 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSessionListFragmentInteractionListener) {
-            mListener = (OnSessionListFragmentInteractionListener) context;
+        if (context instanceof OnEventListFragmentInteractionListener) {
+            mListener = (OnEventListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnSessionListFragmentInteractionListener");
+                    + " must implement OnEventListFragmentInteractionListener");
         }
     }
 
@@ -109,32 +107,33 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
 
     @Override
     public void onTaskComplete() {
-
+        throw new UnsupportedOperationException("This method hasn't been implemented...");
     }
 
     @Override
     public void onTaskComplete(String response) {
         try {
             JSONObject result = new JSONObject(response);
-            if (result.getBoolean("success")) {
-                JSONArray jSessions = result.getJSONArray("sessions");
-                for (int i = 0; i < jSessions.length(); i++) {
-                    SSession session = new SSession();
-                    session.fromJSON(jSessions.getJSONObject(i).toString());
-                    mSessions.add(session);
+            if(result.getBoolean("success")){
+                JSONArray jEvents = result.getJSONArray("events");
+                for(int i = 0; i < jEvents.length(); i++){
+                    SEvent event = new SEvent();
+                    event.fromJSON(jEvents.getJSONObject(i).toString());
+                    mainActivity.mEvents.put(event.getId(), event);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mSessions);
+
         mAdapter.notifyDataSetChanged();
+
         progress.dismiss();
     }
 
     @Override
     public void onTaskError(String error) {
-
+        progress.dismiss();
     }
 
     /**
@@ -147,8 +146,8 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnSessionListFragmentInteractionListener {
+    public interface OnEventListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(SSession item);
+        void onEventListFragmentInteraction(SEvent event);
     }
 }

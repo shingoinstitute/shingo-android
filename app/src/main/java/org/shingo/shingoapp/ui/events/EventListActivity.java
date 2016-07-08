@@ -80,9 +80,9 @@ public class EventListActivity extends AppCompatActivity implements OnTaskComple
             if(result.getBoolean("success")){
                 JSONArray jEvents = result.getJSONArray("events");
                 for(int i = 0; i < jEvents.length(); i++){
-                    JSONObject jEvent = jEvents.getJSONObject(i);
-                    mEvents.add(new SEvent(jEvent.getString("Id"), jEvent.getString("Name"),
-                            jEvent.getString("Start_Date__c"), jEvent.getString("End_Date__c")));
+                    SEvent event = new SEvent();
+                    event.fromJSON(jEvents.getJSONObject(i).toString());
+                    // add to mainacivity.mEvents
                 }
             }
         } catch (JSONException e) {

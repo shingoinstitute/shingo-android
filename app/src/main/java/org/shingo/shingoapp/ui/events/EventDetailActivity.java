@@ -22,7 +22,6 @@ import org.shingo.shingoapp.middle.SEntity.SPerson;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.middle.SEvent.SSession;
-import org.shingo.shingoapp.ui.ModelActivity;
 
 public class EventDetailActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnTaskComplete,
@@ -107,6 +106,7 @@ public class EventDetailActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        if(item == null) return false;
         int id = item.getItemId();
 
         if (id == R.id.nav_agenda) {
@@ -134,7 +134,6 @@ public class EventDetailActivity extends AppCompatActivity
         } else if(id == R.id.nav_events){
             startActivity(new Intent(this, EventListActivity.class));
         } else if(id == R.id.nav_model){
-            startActivity(new Intent(this, ModelActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -178,8 +177,6 @@ public class EventDetailActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.event_detail, fragment)
                     .commit();
-
-            navigationView.getMenu().findItem(R.id.nav_sessions).setChecked(true);
         }
     }
 
@@ -190,8 +187,6 @@ public class EventDetailActivity extends AppCompatActivity
         fragmentManager.beginTransaction()
                 .replace(R.id.event_detail, fragment)
                 .commit();
-
-        navigationView.getMenu().findItem(R.id.nav_speakers).setChecked(true);
     }
 
     @Override
