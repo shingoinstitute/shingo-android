@@ -2,44 +2,55 @@ package org.shingo.shingoapp.ui.events;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.sectionedrecyclerview.SectionedRecyclerViewAdapter;
+
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.middle.SEvent.SSession;
-import org.shingo.shingoapp.ui.events.SessionFragment.OnSessionListFragmentInteractionListener;
+import org.shingo.shingoapp.ui.events.SessionFragment.*;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link SSession} and makes a call to the
- * specified {@link OnSessionListFragmentInteractionListener}.
- *
+ * Created by dustinehoman on 7/12/16.
  */
-public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySessionRecyclerViewAdapter.ViewHolder> {
+public class MySessionSectionedRecylclerViewAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
 
-    private List<SSession> mValues;
+    private final List<SectionedSessionDataModel> mData;
     private final OnSessionListFragmentInteractionListener mListener;
 
-    public MySessionRecyclerViewAdapter(List<SSession> items, OnSessionListFragmentInteractionListener listener){
-        mValues = items;
+    public MySessionSectionedRecylclerViewAdapter(List<SectionedSessionDataModel> data, OnSessionListFragmentInteractionListener listener){
+        mData = data;
         mListener = listener;
     }
-
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_session, parent, false);
-        return new ViewHolder(view);
+    public int getSectionCount() {
+        return mData.size();
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
+    public int getItemCount(int section) {
+        return mData.get(section).getItems().size();
+    }
+
+    @Override
+    public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
+        String day = mData.get(section).getDay();
+        SectionViewHolder sectionViewHolder = (SectionViewHolder) holder;
+        sectionViewHolder.sectionTitle.setText(day);
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder vh, int section, int relativePosition, int absolutePosition) {
+        List<SSession> items = mData.get(section).getItems();
+
+        final ItemViewHolder holder = (ItemViewHolder) vh;
+        holder.mItem = items.get(relativePosition);
         holder.mTitleView.setText(holder.mItem.getName());
         holder.mTimeView.setText(holder.mItem.getTimeString());
         holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
@@ -58,6 +69,7 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         if(holder.mItem.type == SSession.SSessionType.Social){
             holder.mSpeakersView.setVisibility(View.INVISIBLE);
         } else {
+            holder.mSpeakersView.setVisibility(View.VISIBLE);
             holder.mSpeakersView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -72,11 +84,36 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
     }
 
     @Override
-    public int getItemCount() {
-        return mValues.size();
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = null;
+        switch (viewType){
+            case SectionedRecyclerViewAdapter.VIEW_TYPE_HEADER:
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_header, parent, false);
+                return new SectionViewHolder(v);
+            case SectionedRecyclerViewAdapter.VIEW_TYPE_ITEM:
+                v = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_session, parent, false);
+                return new ItemViewHolder(v);
+            default:
+                return new RecyclerView.ViewHolder(v) {
+                    @Override
+                    public String toString() {
+                        return super.toString();
+                    }
+                };
+        }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class SectionViewHolder extends RecyclerView.ViewHolder{
+        final TextView sectionTitle;
+
+        public SectionViewHolder(View itemView){
+            super(itemView);
+            sectionTitle = (TextView) itemView.findViewById(R.id.list_header);
+        }
+    }
+
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mTitleView;
         public final TextView mTimeView;
@@ -86,7 +123,7 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
 
         public SSession mItem;
 
-        public ViewHolder(View view) {
+        public ItemViewHolder(View view) {
             super(view);
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.session_title);

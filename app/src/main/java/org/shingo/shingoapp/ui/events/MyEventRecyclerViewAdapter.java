@@ -1,6 +1,5 @@
 package org.shingo.shingoapp.ui.events;
 
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,21 +10,19 @@ import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.ui.events.EventFragment.OnEventListFragmentInteractionListener;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link SEvent} and makes a call to the
  * specified {@link OnEventListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
+ *
  */
 public class MyEventRecyclerViewAdapter extends RecyclerView.Adapter<MyEventRecyclerViewAdapter.ViewHolder> {
 
-    private final Collection<SEvent> mValues;
+    private final List<SEvent> mValues;
     private final OnEventListFragmentInteractionListener mListener;
 
-    public MyEventRecyclerViewAdapter(Collection<SEvent> items, OnEventListFragmentInteractionListener listener) {
+    public MyEventRecyclerViewAdapter(List<SEvent> items, OnEventListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -39,9 +36,7 @@ public class MyEventRecyclerViewAdapter extends RecyclerView.Adapter<MyEventRecy
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        ArrayList<SEvent> copy = new ArrayList<>(mValues);
-        holder.mItem = copy.get(position);
-        // TODO: Populate event list view
+        holder.mItem = mValues.get(position);
         holder.mIdView.setText(holder.mItem.getName());
         holder.mContentView.setText(holder.mItem.getDisplayLocation());
 

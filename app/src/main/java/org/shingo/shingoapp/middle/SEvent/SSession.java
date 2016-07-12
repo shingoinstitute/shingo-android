@@ -27,13 +27,20 @@ public class SSession extends SObject implements Comparable<SObject> {
     private SRoom room;
     private Date start;
     private Date end;
-    private List<SPerson> speakers = new ArrayList<>();
+    /**
+        A list of Salesforce Ids for {@link SPerson}s
+     */
+    private List<String> speakers = new ArrayList<>();
     public SSessionType type;
 
     public SSession(){}
 
+    public SSession(String id){
+        this.id = id;
+    }
+
     public SSession(String id, String name, String summary, SRoom room, Date start, Date end,
-                    List<SPerson> speakers, SSessionType type){
+                    List<String> speakers, SSessionType type){
         super(id, name);
         this.summary = summary;
         this.room = room;
@@ -48,23 +55,24 @@ public class SSession extends SObject implements Comparable<SObject> {
         super.fromJSON(json);
         try {
             JSONObject jsonSession = new JSONObject(json);
-            this.name = (jsonSession.getString("Session_Display_Name__c").equals("null") ? "Session" : jsonSession.getString("Session_Display_Name__c"));
-            if(jsonSession.has("Summary__c")) {
-                this.summary = jsonSession.getString("Summary__c").equals("null") ? "Summary coming soon!" : jsonSession.getString("Summary__c");
-            }
+            this.name = (jsonSession.isNull("Session_Display_Name__c") ? "Session" : jsonSession.getString("Session_Display_Name__c"));
+            if(jsonSession.has("Summary__c"))
+                this.summary = jsonSession.isNull("Summary__c") ? "Summary coming soon!" : jsonSession.getString("Summary__c");
             if(jsonSession.has("Room__r")) {
                 this.room = new SRoom();
                 this.room.fromJSON(jsonSession.getJSONObject("Room__r").toString());
             }
-            this.start = formatDateTimeString(jsonSession.getString("Start_Date_Time__c"));
-            this.end = formatDateTimeString(jsonSession.getString("End_Date_Time__c"));
-//            JSONArray jSpeakers = jsonSession.getJSONArray("Speakers");
-//            for(int i = 0; i < jSpeakers.length(); i++){
-//                SPerson speaker = new SPerson();
-//                speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
-//                speakers.add(speaker);
-//            }
-            this.type = (jsonSession.getString("Session_Type__c").equals("null") ? SSessionType.Concurrent : SSessionType.valueOf(jsonSession.getString("Session_Type__c").replaceAll("\\s", "")));
+            if(jsonSession.has("Start_Date_Time__c"))
+                this.start = formatDateTimeString(jsonSession.getString("Start_Date_Time__c"));
+            if(jsonSession.has("End_Date_Time__c"))
+                this.end = formatDateTimeString(jsonSession.getString("End_Date_Time__c"));
+            if(jsonSession.has("Session_Speaker_Associations__r") && !jsonSession.isNull("Session_Speaker_Associations__r")){
+                JSONArray jSpeakers = jsonSession.getJSONObject("Session_Speaker_Associations__r").getJSONArray("records");
+                for(int i = 0; i < jSpeakers.length(); i++)
+                    speakers.add(jSpeakers.getJSONObject(i).getJSONObject("Speaker__r").getString("Id"));
+            }
+            if(jsonSession.has("Session_Type__c"))
+                this.type = (jsonSession.isNull("Session_Type__c") ? SSessionType.Concurrent : SSessionType.valueOf(jsonSession.getString("Session_Type__c").replaceAll("\\s", "")));
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
@@ -86,7 +94,7 @@ public class SSession extends SObject implements Comparable<SObject> {
         return end;
     }
 
-    public List<SPerson> getSpeakers(){
+    public List<String> getSpeakers(){
         return speakers;
     }
 

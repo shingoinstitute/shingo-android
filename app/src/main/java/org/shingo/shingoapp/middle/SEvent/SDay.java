@@ -8,8 +8,11 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class holds data fo
@@ -18,17 +21,18 @@ import java.util.List;
  * @author Dustin Homan
  */
 public class SDay extends SObject implements Comparable<SObject> {
-    private List<SSession> sessions;
+    private List<String> sessions = new ArrayList<>();
     private Date date;
 
     public SDay(){}
-    public SDay(String id, String name, Date date, List<SSession> sessions){
+
+    public SDay(String id, String name, Date date, List<String> sessions){
         super(id, name);
         this.date = date;
         this.sessions = sessions;
     }
 
-    public List<SSession> getSessions(){
+    public List<String> getSessions(){
         return sessions;
     }
 
@@ -41,14 +45,15 @@ public class SDay extends SObject implements Comparable<SObject> {
         super.fromJSON(json);
         try {
             JSONObject jsonDay = new JSONObject(json);
-            this.name = jsonDay.getString("Display_Name__c");
-            this.date = formatDateString(jsonDay.getString("Agenda_Date__c"));
-//            JSONArray jSessions = jsonDay.getJSONArray("Sessions");
-//            for(int i = 0; i < jSessions.length(); i++){
-//                SSession session = new SSession();
-//                session.fromJSON(jSessions.getJSONObject(i).toString());
-//                sessions.add(session);
-//            }
+            if(jsonDay.has("Display_Name__c"))
+                this.name = jsonDay.isNull("Display_Name__c") ? "" : jsonDay.getString("Display_Name__c");
+            if(jsonDay.has("Agenda_Date__c"))
+                this.date = formatDateString(jsonDay.getString("Agenda_Date__c"));
+            if(jsonDay.has("Shingo_Sessions__r") && !jsonDay.isNull("Shingo_Sessions__r")) {
+                JSONArray jSessions = jsonDay.getJSONObject("Shingo_Sessions__r").getJSONArray("records");
+                for (int i = 0; i < jSessions.length(); i++)
+                    sessions.add(jSessions.getJSONObject(i).getString("Id"));
+            }
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }

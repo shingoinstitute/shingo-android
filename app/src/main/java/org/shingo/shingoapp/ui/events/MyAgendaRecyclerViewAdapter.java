@@ -17,14 +17,14 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link SDay} and makes a call to the
  * specified {@link AgendaFragment.OnAgendaFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
+ *
  */
 public class MyAgendaRecyclerViewAdapter extends RecyclerView.Adapter<MyAgendaRecyclerViewAdapter.ViewHolder> {
 
-    private final Collection<SDay> mValues;
+    private final List<SDay> mValues;
     private final AgendaFragment.OnAgendaFragmentInteractionListener mListener;
 
-    public MyAgendaRecyclerViewAdapter(Collection<SDay> items, AgendaFragment.OnAgendaFragmentInteractionListener listener) {
+    public MyAgendaRecyclerViewAdapter(List<SDay> items, AgendaFragment.OnAgendaFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -38,10 +38,8 @@ public class MyAgendaRecyclerViewAdapter extends RecyclerView.Adapter<MyAgendaRe
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        ArrayList<SDay> copy = new ArrayList<>(mValues);
-        Collections.sort(copy);
-        holder.mItem = copy.get(position);
-        holder.mNameView.setText(copy.get(position).getName());
+        holder.mItem = mValues.get(position);
+        holder.mNameView.setText(holder.mItem.getName());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

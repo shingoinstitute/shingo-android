@@ -19,10 +19,7 @@ import org.shingo.shingoapp.data.OnTaskComplete;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.ui.MainActivity;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A fragment representing a list of Items.
@@ -35,11 +32,12 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     private static final String ARG_EVENT_ID = "event_id";
     private String mEventId;
     private OnAgendaFragmentInteractionListener mListener;
-    private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
 
     private MainActivity mainActivity;
+
+    private final String CACHE_KEY = "agenda";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -48,8 +46,6 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     public AgendaFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static AgendaFragment newInstance(String mEventId) {
         AgendaFragment fragment = new AgendaFragment();
         Bundle args = new Bundle();
@@ -62,6 +58,7 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null) {
             mEventId = getArguments().getString(ARG_EVENT_ID);
         }
@@ -72,19 +69,26 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_agenda_list, container, false);
 
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            mRecyclerView = (RecyclerView) view;
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        Context context = view.getContext();
+        RecyclerView mRecyclerView = (RecyclerView) view;
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        mainActivity.setTitle("Agenda");
+        if(mainActivity.mEvents.size() == 0){
+            mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
+            return null;
+        }
+        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
+            mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
             GetAsyncData getDaysAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/days", "event_id=" + mEventId};
             getDaysAsync.execute(params);
-            mAdapter = new MyAgendaRecyclerViewAdapter(mainActivity.mEvents.get(mEventId).getAgenda().values(), mListener);
-            mRecyclerView.setAdapter(mAdapter);
 
             progress = ProgressDialog.show(getContext(), "", "Loading agenda...");
         }
+
+        mAdapter = new MyAgendaRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda(), mListener);
+        mRecyclerView.setAdapter(mAdapter);
+
         return view;
     }
 
@@ -113,7 +117,6 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskComplete(String response) {
-        Map<String, SDay> agenda = mainActivity.mEvents.get(mEventId).getAgenda();
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
@@ -121,15 +124,13 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
                 for(int i = 0; i < jDays.length(); i++){
                     SDay day = new SDay();
                     day.fromJSON(jDays.getJSONObject(i).toString());
-                    if(agenda.containsKey(day.getId()))
-                        agenda.get(day.getId()).fromJSON(jDays.getJSONObject(i).toString());
-                    else
-                        agenda.put(day.getId(), day);
+                    mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda().add(day);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Collections.sort(mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda());
         mAdapter.notifyDataSetChanged();
         progress.dismiss();
     }
@@ -150,7 +151,6 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnAgendaFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(SDay day);
     }
 }

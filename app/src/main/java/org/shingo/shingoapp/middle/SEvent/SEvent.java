@@ -1,7 +1,7 @@
 package org.shingo.shingoapp.middle.SEvent;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.text.format.DateUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +13,6 @@ import org.shingo.shingoapp.middle.SObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +34,15 @@ public class SEvent extends SObject implements Comparable<SObject> {
     private String city;
     private String country;
     private String primaryColor;
-    private Map<String,SDay> agenda = new HashMap<>();
+    private String bannerUrl;
+    private Bitmap banner;
+    private List<SDay> agenda = new ArrayList<>();
     private List<SPerson> speakers = new ArrayList<>();
+    private List<SSession> sessions = new ArrayList<>();
     private List<SOrganization> exhibitors = new ArrayList<>();
     private List<SSponsor> sponsors = new ArrayList<>();
-    private Date lastDataPull = new Date();
     private static final long TIME_OUT = TimeUnit.MINUTES.toMillis(15);
+    private Map<String, Date> lastDataPull = new HashMap<>();
 
     public SEvent(){}
 
@@ -55,9 +57,7 @@ public class SEvent extends SObject implements Comparable<SObject> {
         this.city = city;
         this.country = country;
         this.primaryColor = primaryColor;
-        for(SDay day : agenda){
-            this.agenda.put(day.getId(), day);
-        }
+        this.agenda = agenda;
         this.speakers = speakers;
     }
 
@@ -93,19 +93,50 @@ public class SEvent extends SObject implements Comparable<SObject> {
         return country;
     }
 
-    public Map<String, SDay> getAgenda(){
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public Bitmap getBanner() {
+        return banner;
+    }
+
+    public void setBanner(Bitmap banner) {
+        this.banner = banner;
+    }
+
+    public List<SDay> getAgenda(){
         return agenda;
     }
 
     public List<SSession> getSessions(){
-        List<SSession> sessions = new ArrayList<>();
-        for(SDay day : agenda.values()){
-            sessions.addAll(day.getSessions());
+        return sessions;
+    }
+
+    public List<SSession> getSubsetSessions(List<String> ids){
+        if(ids.size() == 0) return new ArrayList<>();
+        int start = sessions.size() - 1;
+        int end = 0;
+        for(String s : ids){
+            int i = sessions.indexOf(new SSession(s));
+            start = i < start ? i : start;
+            end = i > end ? i : end;
         }
 
-        Collections.sort(sessions);
+        return sessions.subList(start, end + 1);
+    }
 
-        return sessions;
+    public List<SPerson> getSubsetSpeakers(List<String> ids){
+        if(ids.size() == 0) return new ArrayList<>();
+        int start = speakers.size() - 1;
+        int end = 0;
+        for(String s : ids){
+            int i = speakers.indexOf(new SPerson(s));
+            start = i < start ? i : start;
+            end = i > end ? i : end;
+        }
+
+        return speakers.subList(start, end + 1);
     }
 
     public List<SPerson> getSpeakers(){
@@ -161,20 +192,31 @@ public class SEvent extends SObject implements Comparable<SObject> {
                 for (int i = 0; i < jDays.length(); i++) {
                     SDay day = new SDay();
                     day.fromJSON(jDays.getJSONObject(i).toString());
-                    agenda.put(day.getId(),day);
+                    agenda.add(day);
                 }
             }
+            if(jsonEvent.has("Banner_URL__c"))
+                this.bannerUrl = jsonEvent.isNull("Banner_URL__c") ? "" : jsonEvent.getString("Banner_URL__c");
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
     }
 
-    public boolean needsUpdated(){
+    public boolean needsUpdated(String data){
+        if(!lastDataPull.containsKey(data)) return true;
         Date now = new Date();
-        return now.after(new Date(lastDataPull.getTime() + TIME_OUT));
+        return now.after(new Date(lastDataPull.get(data).getTime() + TIME_OUT));
     }
 
-    public void updatePullTime(){
-        lastDataPull = new Date();
+    public void updatePullTime(String data){
+        if(lastDataPull.containsKey(data)){
+            lastDataPull.get(data).setTime(new Date().getTime());
+        } else {
+            lastDataPull.put(data, new Date());
+        }
+    }
+
+    public boolean hasCache(String data){
+        return lastDataPull.containsKey(data);
     }
 }

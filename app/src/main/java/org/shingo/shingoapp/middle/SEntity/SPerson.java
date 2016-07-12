@@ -37,6 +37,10 @@ public class SPerson extends SEntity implements Comparable<SObject> {
         this.type = type;
     }
 
+    public SPerson(String id) {
+        this.id = id;
+    }
+
     @Override
     protected void getTypeFromString(String type){
         switch (type){

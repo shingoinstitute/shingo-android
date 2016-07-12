@@ -15,15 +15,6 @@
             android:value="7b270db836d504381374de50e898a9c6867f3861" />
 
         <activity
-            android:name=".ui.events.EventDetailActivity"
-            android:label="@string/title_activity_event_detail"
-            android:parentActivityName=".ui.events.EventListActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.shingo.shingoapp.ui.events.EventListActivity" />
-        </activity>
-        <activity
             android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
