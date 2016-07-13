@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of {@link SSession}s.
  * <p/>
  * Activities containing this fragment MUST implement the {@link OnSessionListFragmentInteractionListener}
  * interface.
@@ -91,6 +91,7 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         Context context = view.getContext();
         RecyclerView mRecyclerView = (RecyclerView) view;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+
         if(!isSectioned && mainActivity.mEvents.get(eventIndex).hasCache(CACHE_KEY)) {
             mAdapter = new MySessionRecyclerViewAdapter(mainActivity.mEvents.get(eventIndex).getSubsetSessions(mIds), mListener);
         } else if(!isSectioned){

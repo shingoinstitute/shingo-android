@@ -2,6 +2,8 @@ package org.shingo.shingoapp.middle.SEntity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
@@ -17,12 +19,14 @@ import org.shingo.shingoapp.R;
  *
  * @author Dustin Homan
  */
-public class SOrganization extends SEntity implements Comparable<SObject> {
+public class SOrganization extends SEntity implements Comparable<SObject>,Parcelable {
 
     protected String website;
     protected String email;
     protected String phone;
     public SOrganizationType type;
+
+    public SOrganization(){}
 
     public SOrganization(String id, String name, String summary, String website, String email,
                          String phone, Bitmap image, SOrganizationType type){
@@ -96,4 +100,48 @@ public class SOrganization extends SEntity implements Comparable<SObject> {
         Sponsor,
         None
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.website);
+        dest.writeString(this.email);
+        dest.writeString(this.phone);
+        dest.writeInt(this.type == null ? -1 : this.type.ordinal());
+        dest.writeParcelable(this.image, flags);
+        dest.writeString(this.imageUrl);
+        dest.writeString(this.summary);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SOrganization(Parcel in) {
+        this.website = in.readString();
+        this.email = in.readString();
+        this.phone = in.readString();
+        int tmpType = in.readInt();
+        this.type = tmpType == -1 ? null : SOrganizationType.values()[tmpType];
+        this.image = in.readParcelable(Bitmap.class.getClassLoader());
+        this.imageUrl = in.readString();
+        this.summary = in.readString();
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Creator<SOrganization> CREATOR = new Creator<SOrganization>() {
+        @Override
+        public SOrganization createFromParcel(Parcel source) {
+            return new SOrganization(source);
+        }
+
+        @Override
+        public SOrganization[] newArray(int size) {
+            return new SOrganization[size];
+        }
+    };
+
 }

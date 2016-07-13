@@ -2,6 +2,8 @@ package org.shingo.shingoapp.middle.SEntity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.view.View;
@@ -18,7 +20,7 @@ import org.shingo.shingoapp.R;
  *
  * @author Dustin Homan
  */
-public class SRecipient extends SEntity implements Comparable<SObject> {
+public class SRecipient extends SEntity implements Comparable<SObject>,Parcelable {
     private String author;
     public SRecipientAward award;
 
@@ -94,4 +96,43 @@ public class SRecipient extends SEntity implements Comparable<SObject> {
             return awardName;
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.author);
+        dest.writeInt(this.award == null ? -1 : this.award.ordinal());
+        dest.writeParcelable(this.image, flags);
+        dest.writeString(this.imageUrl);
+        dest.writeString(this.summary);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SRecipient(Parcel in) {
+        this.author = in.readString();
+        int tmpAward = in.readInt();
+        this.award = tmpAward == -1 ? null : SRecipientAward.values()[tmpAward];
+        this.image = in.readParcelable(Bitmap.class.getClassLoader());
+        this.imageUrl = in.readString();
+        this.summary = in.readString();
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SRecipient> CREATOR = new Parcelable.Creator<SRecipient>() {
+        @Override
+        public SRecipient createFromParcel(Parcel source) {
+            return new SRecipient(source);
+        }
+
+        @Override
+        public SRecipient[] newArray(int size) {
+            return new SRecipient[size];
+        }
+    };
 }

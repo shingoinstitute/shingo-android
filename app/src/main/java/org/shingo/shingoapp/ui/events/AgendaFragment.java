@@ -79,6 +79,7 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
         }
         if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
             mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
+            mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda().clear();
             GetAsyncData getDaysAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/days", "event_id=" + mEventId};
             getDaysAsync.execute(params);

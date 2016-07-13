@@ -1,5 +1,7 @@
 package org.shingo.shingoapp.middle.SEvent;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -22,7 +24,7 @@ import java.util.TimeZone;
  *
  * @author Dustin Homan
  */
-public class SSession extends SObject implements Comparable<SObject> {
+public class SSession extends SObject implements Comparable<SObject>,Parcelable {
     private String summary;
     private SRoom room;
     private Date start;
@@ -145,4 +147,47 @@ public class SSession extends SObject implements Comparable<SObject> {
             return type;
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.summary);
+        dest.writeParcelable(this.room, flags);
+        dest.writeLong(this.start != null ? this.start.getTime() : -1);
+        dest.writeLong(this.end != null ? this.end.getTime() : -1);
+        dest.writeStringList(this.speakers);
+        dest.writeInt(this.type == null ? -1 : this.type.ordinal());
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SSession(Parcel in) {
+        this.summary = in.readString();
+        this.room = in.readParcelable(SRoom.class.getClassLoader());
+        long tmpStart = in.readLong();
+        this.start = tmpStart == -1 ? null : new Date(tmpStart);
+        long tmpEnd = in.readLong();
+        this.end = tmpEnd == -1 ? null : new Date(tmpEnd);
+        this.speakers = in.createStringArrayList();
+        int tmpType = in.readInt();
+        this.type = tmpType == -1 ? null : SSessionType.values()[tmpType];
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SSession> CREATOR = new Parcelable.Creator<SSession>() {
+        @Override
+        public SSession createFromParcel(Parcel source) {
+            return new SSession(source);
+        }
+
+        @Override
+        public SSession[] newArray(int size) {
+            return new SSession[size];
+        }
+    };
 }

@@ -1,6 +1,8 @@
 package org.shingo.shingoapp.middle.SEvent;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -8,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
+import org.shingo.shingoapp.middle.SEntity.SRecipient;
 import org.shingo.shingoapp.middle.SEntity.SSponsor;
 import org.shingo.shingoapp.middle.SObject;
 
@@ -25,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Dustin Homan
  */
-public class SEvent extends SObject implements Comparable<SObject> {
+public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
     private Date start;
     private Date end;
     private String registration;
@@ -35,12 +38,14 @@ public class SEvent extends SObject implements Comparable<SObject> {
     private String country;
     private String primaryColor;
     private String bannerUrl;
+    private String salesText;
     private Bitmap banner;
     private List<SDay> agenda = new ArrayList<>();
     private List<SPerson> speakers = new ArrayList<>();
     private List<SSession> sessions = new ArrayList<>();
     private List<SOrganization> exhibitors = new ArrayList<>();
     private List<SSponsor> sponsors = new ArrayList<>();
+    private List<SRecipient> recipients = new ArrayList<>();
     private static final long TIME_OUT = TimeUnit.MINUTES.toMillis(15);
     private Map<String, Date> lastDataPull = new HashMap<>();
 
@@ -97,6 +102,10 @@ public class SEvent extends SObject implements Comparable<SObject> {
         return bannerUrl;
     }
 
+    public String getSalesText() {
+        return salesText;
+    }
+
     public Bitmap getBanner() {
         return banner;
     }
@@ -151,6 +160,10 @@ public class SEvent extends SObject implements Comparable<SObject> {
         return sponsors;
     }
 
+    public List<SRecipient> getRecipients() {
+        return recipients;
+    }
+
     @Override
     public int compareTo(@NonNull SObject a){
         if(!(a instanceof SEvent))
@@ -188,6 +201,7 @@ public class SEvent extends SObject implements Comparable<SObject> {
             if(jsonEvent.has("Primary_Color__c"))
                 this.primaryColor = (jsonEvent.getString("Primary_Color__c").equals("null") ? "#640921" : jsonEvent.getString("Primary_Color__c"));
             if(jsonEvent.has("Shingo_Day_Agendas__r")) {
+                agenda.clear();
                 JSONArray jDays = jsonEvent.getJSONObject("Shingo_Day_Agendas__r").getJSONArray("records");
                 for (int i = 0; i < jDays.length(); i++) {
                     SDay day = new SDay();
@@ -195,6 +209,8 @@ public class SEvent extends SObject implements Comparable<SObject> {
                     agenda.add(day);
                 }
             }
+            if(jsonEvent.has("Sales_Text__c"))
+                this.salesText = jsonEvent.isNull("Sales_Text__c") ? "" : jsonEvent.getString("Sales_Text__c");
             if(jsonEvent.has("Banner_URL__c"))
                 this.bannerUrl = jsonEvent.isNull("Banner_URL__c") ? "" : jsonEvent.getString("Banner_URL__c");
         } catch (JSONException | ParseException e) {
@@ -219,4 +235,79 @@ public class SEvent extends SObject implements Comparable<SObject> {
     public boolean hasCache(String data){
         return lastDataPull.containsKey(data);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.start != null ? this.start.getTime() : -1);
+        dest.writeLong(this.end != null ? this.end.getTime() : -1);
+        dest.writeString(this.registration);
+        dest.writeParcelable(this.venue, flags);
+        dest.writeString(this.displayLocation);
+        dest.writeString(this.city);
+        dest.writeString(this.country);
+        dest.writeString(this.primaryColor);
+        dest.writeString(this.bannerUrl);
+        dest.writeString(this.salesText);
+        dest.writeParcelable(this.banner, flags);
+        dest.writeTypedList(this.agenda);
+        dest.writeTypedList(this.speakers);
+        dest.writeTypedList(this.sessions);
+        dest.writeTypedList(this.exhibitors);
+        dest.writeTypedList(this.sponsors);
+        dest.writeInt(this.lastDataPull.size());
+        for (Map.Entry<String, Date> entry : this.lastDataPull.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeLong(entry.getValue() != null ? entry.getValue().getTime() : -1);
+        }
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SEvent(Parcel in) {
+        long tmpStart = in.readLong();
+        this.start = tmpStart == -1 ? null : new Date(tmpStart);
+        long tmpEnd = in.readLong();
+        this.end = tmpEnd == -1 ? null : new Date(tmpEnd);
+        this.registration = in.readString();
+        this.venue = in.readParcelable(SVenue.class.getClassLoader());
+        this.displayLocation = in.readString();
+        this.city = in.readString();
+        this.country = in.readString();
+        this.primaryColor = in.readString();
+        this.bannerUrl = in.readString();
+        this.salesText = in.readString();
+        this.banner = in.readParcelable(Bitmap.class.getClassLoader());
+        this.agenda = in.createTypedArrayList(SDay.CREATOR);
+        this.speakers = in.createTypedArrayList(SPerson.CREATOR);
+        this.sessions = in.createTypedArrayList(SSession.CREATOR);
+        this.exhibitors = in.createTypedArrayList(SOrganization.CREATOR);
+        this.sponsors = in.createTypedArrayList(SSponsor.CREATOR);
+        int lastDataPullSize = in.readInt();
+        this.lastDataPull = new HashMap<String, Date>(lastDataPullSize);
+        for (int i = 0; i < lastDataPullSize; i++) {
+            String key = in.readString();
+            long tmpValue = in.readLong();
+            Date value = tmpValue == -1 ? null : new Date(tmpValue);
+            this.lastDataPull.put(key, value);
+        }
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SEvent> CREATOR = new Parcelable.Creator<SEvent>() {
+        @Override
+        public SEvent createFromParcel(Parcel source) {
+            return new SEvent(source);
+        }
+
+        @Override
+        public SEvent[] newArray(int size) {
+            return new SEvent[size];
+        }
+    };
 }

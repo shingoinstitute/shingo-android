@@ -107,6 +107,7 @@ public class EventFragment extends Fragment implements OnTaskComplete {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
                 JSONArray jEvents = result.getJSONArray("events");
+                mainActivity.mEvents.clear();
                 for(int i = 0; i < jEvents.length(); i++){
                     SEvent event = new SEvent();
                     event.fromJSON(jEvents.getJSONObject(i).toString());

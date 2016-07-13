@@ -17,7 +17,7 @@ import java.net.URL;
  */
 public abstract class SEntity extends SObject {
     protected Bitmap image;
-    private String imageUrl;
+    protected String imageUrl;
     protected String summary;
 
     public SEntity(){}

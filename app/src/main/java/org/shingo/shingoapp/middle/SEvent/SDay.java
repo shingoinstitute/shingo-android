@@ -1,5 +1,7 @@
 package org.shingo.shingoapp.middle.SEvent;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -20,7 +22,7 @@ import java.util.Map;
  *
  * @author Dustin Homan
  */
-public class SDay extends SObject implements Comparable<SObject> {
+public class SDay extends SObject implements Comparable<SObject>,Parcelable {
     private List<String> sessions = new ArrayList<>();
     private Date date;
 
@@ -73,4 +75,36 @@ public class SDay extends SObject implements Comparable<SObject> {
         return compareDate;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringList(this.sessions);
+        dest.writeLong(this.date != null ? this.date.getTime() : -1);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SDay(Parcel in) {
+        this.sessions = in.createStringArrayList();
+        long tmpDate = in.readLong();
+        this.date = tmpDate == -1 ? null : new Date(tmpDate);
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SDay> CREATOR = new Parcelable.Creator<SDay>() {
+        @Override
+        public SDay createFromParcel(Parcel source) {
+            return new SDay(source);
+        }
+
+        @Override
+        public SDay[] newArray(int size) {
+            return new SDay[size];
+        }
+    };
 }

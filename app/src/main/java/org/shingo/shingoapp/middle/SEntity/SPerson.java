@@ -2,6 +2,8 @@ package org.shingo.shingoapp.middle.SEntity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.view.View;
@@ -21,7 +23,7 @@ import org.shingo.shingoapp.R;
  *
  * @author Dustin Homan
  */
-public class SPerson extends SEntity implements Comparable<SObject> {
+public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
 
     private String title;
     private String company;
@@ -126,4 +128,45 @@ public class SPerson extends SEntity implements Comparable<SObject> {
             return type;
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.company);
+        dest.writeInt(this.type == null ? -1 : this.type.ordinal());
+        dest.writeParcelable(this.image, flags);
+        dest.writeString(this.imageUrl);
+        dest.writeString(this.summary);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SPerson(Parcel in) {
+        this.title = in.readString();
+        this.company = in.readString();
+        int tmpType = in.readInt();
+        this.type = tmpType == -1 ? null : SPersonType.values()[tmpType];
+        this.image = in.readParcelable(Bitmap.class.getClassLoader());
+        this.imageUrl = in.readString();
+        this.summary = in.readString();
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SPerson> CREATOR = new Parcelable.Creator<SPerson>() {
+        @Override
+        public SPerson createFromParcel(Parcel source) {
+            return new SPerson(source);
+        }
+
+        @Override
+        public SPerson[] newArray(int size) {
+            return new SPerson[size];
+        }
+    };
 }

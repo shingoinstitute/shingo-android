@@ -1,5 +1,8 @@
 package org.shingo.shingoapp.middle.SEvent;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SObject;
@@ -10,7 +13,7 @@ import org.shingo.shingoapp.middle.SObject;
  *
  * @author Dustin Homan
  */
-public class SRoom extends SObject implements Comparable<SObject> {
+public class SRoom extends SObject implements Comparable<SObject>,Parcelable {
     private double[] location = new double[2];
     private int floor;
 
@@ -54,4 +57,36 @@ public class SRoom extends SObject implements Comparable<SObject> {
 
         return floorCompare;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDoubleArray(this.location);
+        dest.writeInt(this.floor);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    protected SRoom(Parcel in) {
+        this.location = in.createDoubleArray();
+        this.floor = in.readInt();
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static final Parcelable.Creator<SRoom> CREATOR = new Parcelable.Creator<SRoom>() {
+        @Override
+        public SRoom createFromParcel(Parcel source) {
+            return new SRoom(source);
+        }
+
+        @Override
+        public SRoom[] newArray(int size) {
+            return new SRoom[size];
+        }
+    };
 }
