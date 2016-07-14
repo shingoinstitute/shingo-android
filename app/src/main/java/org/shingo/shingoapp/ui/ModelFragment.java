@@ -26,10 +26,8 @@ public class ModelFragment extends Fragment {
      *
      * @return A new instance of fragment ModelFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ModelFragment newInstance() {
-        ModelFragment fragment = new ModelFragment();
-        return fragment;
+        return new ModelFragment();
     }
 
     @Override

@@ -139,7 +139,6 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         dest.writeString(this.title);
         dest.writeString(this.company);
         dest.writeInt(this.type == null ? -1 : this.type.ordinal());
-        dest.writeParcelable(this.image, flags);
         dest.writeString(this.imageUrl);
         dest.writeString(this.summary);
         dest.writeString(this.id);
@@ -151,7 +150,6 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         this.company = in.readString();
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : SPersonType.values()[tmpType];
-        this.image = in.readParcelable(Bitmap.class.getClassLoader());
         this.imageUrl = in.readString();
         this.summary = in.readString();
         this.id = in.readString();

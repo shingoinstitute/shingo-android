@@ -1,5 +1,6 @@
 package org.shingo.shingoapp.ui;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +26,8 @@ import android.widget.TextView;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
+import org.shingo.shingoapp.middle.SEntity.SRecipient;
+import org.shingo.shingoapp.middle.SEntity.SSponsor;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.middle.SEvent.SSession;
@@ -31,8 +35,10 @@ import org.shingo.shingoapp.ui.events.AgendaFragment;
 import org.shingo.shingoapp.ui.events.EventDetailFragment;
 import org.shingo.shingoapp.ui.events.EventFragment;
 import org.shingo.shingoapp.ui.events.ExhibitorFragment;
+import org.shingo.shingoapp.ui.events.RecipientFragment;
 import org.shingo.shingoapp.ui.events.SessionFragment;
 import org.shingo.shingoapp.ui.events.SpeakerFragment;
+import org.shingo.shingoapp.ui.events.SponsorFragment;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,10 +49,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, EventFragment.OnEventListFragmentInteractionListener,
         AgendaFragment.OnAgendaFragmentInteractionListener, SessionFragment.OnSessionListFragmentInteractionListener,
         SpeakerFragment.OnSpeakerListFragmentInteractionListener, EventDetailFragment.OnEventFragmentInteractionListener,
-        ExhibitorFragment.OnListFragmentInteractionListener {
+        ExhibitorFragment.OnListFragmentInteractionListener, RecipientFragment.OnListFragmentInteractionListener,
+        SponsorFragment.OnListFragmentInteractionListener {
 
     public ArrayList<SEvent> mEvents = new ArrayList<>();
-    public int mEventIndex;
+    public int mEventIndex = 0;
     private Date lastListPull;
     public DrawerLayout drawer;
     public NavigationView navigationView;
@@ -54,6 +61,7 @@ public class MainActivity extends AppCompatActivity
     private Fragment mFragment;
     private int mToggle = 0;
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,13 +87,10 @@ public class MainActivity extends AppCompatActivity
             mEvents = savedInstanceState.getParcelableArrayList("events");
             if(savedInstanceState.containsKey("update"))
                 lastListPull = new Date(savedInstanceState.getLong("update"));
-            mToggle = savedInstanceState.getInt("toggle");
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            mFragment = fragmentManager.getFragment(savedInstanceState, "mFragment");
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, mFragment)
-                    .commit();
-            toggleNavHeader(mToggle);
+            mEventIndex = savedInstanceState.getInt("index");
+            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, "mFragment");
+            replaceFragment(mFragment);
+            toggleNavHeader(savedInstanceState.getInt("toggle"));
         } else {
             onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_home));
         }
@@ -96,12 +101,14 @@ public class MainActivity extends AppCompatActivity
         outState.putParcelableArrayList("events", mEvents);
         if(lastListPull != null)
             outState.putLong("update", lastListPull.getTime());
+        outState.putInt("index", mEventIndex);
         outState.putInt("toggle", mToggle);
         super.onSaveInstanceState(outState);
 
         getSupportFragmentManager().putFragment(outState, "mFragment", mFragment);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onBackPressed() {
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -141,79 +148,77 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         if(item == null) return false;
         int id = item.getItemId();
+        String eventId = "";
+        if(mEvents.size() > 0)
+            eventId = mEvents.get(mEventIndex).getId();
 
-        if(id == R.id.nav_home){
-            toggleNavHeader(0);
-            setTitle("Shingo App");
-            HomeFragment fragment = HomeFragment.newInstance();
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if(id == R.id.nav_detail){
-            toggleNavHeader(1);
-            EventDetailFragment fragment = EventDetailFragment.newInstance(mEvents.get(mEventIndex).getId());
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if (id == R.id.nav_agenda) {
-            AgendaFragment fragment = AgendaFragment.newInstance(mEvents.get(mEventIndex).getId());
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if (id == R.id.nav_sessions) {
-            SessionFragment fragment = SessionFragment.newInstance();
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if (id == R.id.nav_speakers) {
-            SpeakerFragment fragment = SpeakerFragment.newInstance();
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if (id == R.id.nav_exhibitors){
-            ExhibitorFragment fragment = ExhibitorFragment.newInstance(mEvents.get(mEventIndex).getId());
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if (id == R.id.nav_login) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if(id == R.id.nav_events){
-            toggleNavHeader(0);
-            EventFragment fragment = EventFragment.newInstance();
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
-        } else if(id == R.id.nav_model){
-            toggleNavHeader(0);
-            ModelFragment fragment = ModelFragment.newInstance();
-            mFragment = fragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.main_content, fragment)
-                    .commit();
+        Fragment fragment;
+        switch (id) {
+            case R.id.nav_detail:
+                toggleNavHeader(1);
+                fragment = EventDetailFragment.newInstance(eventId);
+                break;
+            case R.id.nav_agenda:
+                fragment = AgendaFragment.newInstance(eventId);
+                break;
+            case R.id.nav_sessions:
+                fragment = SessionFragment.newInstance();
+                break;
+            case R.id.nav_speakers:
+                fragment = SpeakerFragment.newInstance();
+                break;
+            case R.id.nav_exhibitors:
+                fragment = ExhibitorFragment.newInstance(eventId);
+                break;
+            case R.id.nav_recipients:
+                fragment = RecipientFragment.newInstance(eventId);
+                break;
+            case R.id.nav_sponsors:
+                fragment = SponsorFragment.newInstance(eventId);
+                break;
+            case R.id.nav_events:
+                toggleNavHeader(0);
+                fragment = EventFragment.newInstance();
+                break;
+            case R.id.nav_model:
+                toggleNavHeader(0);
+                fragment = ModelFragment.newInstance();
+                break;
+            case R.id.nav_home:
+            default:
+                toggleNavHeader(0);
+                fragment = HomeFragment.newInstance();
+                break;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        assert drawer != null;
+        mFragment = fragment;
+        replaceFragment(fragment);
+
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    public void handleError(String error){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(error)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).setTitle("Error")
+                .setIcon(R.drawable.ic_error);
+        builder.create().show();
+    }
+
+    private void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.main_content, fragment)
+                .commit();
+    }
+
+    @SuppressWarnings("deprecation")
     private void toggleNavHeader(int type){
         mToggle = type;
         View header = navigationView.getHeaderView(0);
@@ -221,8 +226,8 @@ public class MainActivity extends AppCompatActivity
             case 0:
                 navigationView.getMenu().findItem(R.id.event_menu).setVisible(false);
                 header.findViewById(R.id.nav_header).setBackground(new ColorDrawable(getResources().getColor(R.color.colorPrimaryDark)));
-                ((TextView) header.findViewById(R.id.nav_header_title)).setText("Shingo Institute");
-                ((TextView) header.findViewById(R.id.nav_header_detail)).setText("shingo.org");
+                ((TextView) header.findViewById(R.id.nav_header_title)).setText(getString(R.string.name));
+                ((TextView) header.findViewById(R.id.nav_header_detail)).setText(getString(R.string.web_addr));
                 break;
             case 1:
                 SEvent event = mEvents.get(mEventIndex);
@@ -271,9 +276,8 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public boolean needsUpdated(){
-        if(lastListPull == null) return true;
-        return lastListPull.after(new Date(lastListPull.getTime() + TIME_OUT));
+    public boolean needsUpdated() {
+        return lastListPull == null || lastListPull.after(new Date(lastListPull.getTime() + TIME_OUT));
     }
 
     public void updateListPull(){
@@ -290,30 +294,40 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onListFragmentInteraction(SRecipient item) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(SSponsor item) {
+
+    }
+
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        View bmImage;
+        View view;
         SEvent event;
 
-        public DownloadImageTask(View bmImage, SEvent event) {
-            this.bmImage = bmImage;
+        public DownloadImageTask(View view, SEvent event) {
+            this.view = view;
             this.event = event;
         }
 
         protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
+            String url = urls[0];
+            Bitmap bitmap = null;
             try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
+                InputStream in = new java.net.URL(url).openStream();
+                bitmap = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-            return mIcon11;
+            return bitmap;
         }
 
         protected void onPostExecute(Bitmap result) {
-            bmImage.setBackground(new BitmapDrawable(getResources(), result));
+            view.setBackground(new BitmapDrawable(getResources(), result));
             event.setBanner(result);
         }
     }

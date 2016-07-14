@@ -21,8 +21,12 @@ import java.net.URL;
 public class SSponsor extends SOrganization implements Comparable<SObject> {
 
     private Bitmap banner;
+    private Bitmap splash;
+    private String bannerUrl;
+    private String splashUrl;
     public SSponsorLevel level;
-    public boolean is_banner_loading = false;
+
+    public SSponsor(){}
 
     public SSponsor(String id, String name, String summary, String website, String email, String phone, Bitmap image, Bitmap banner, SSponsorLevel level) {
         super(id, name, summary, website, email, phone, image, SOrganizationType.Sponsor);
@@ -32,6 +36,26 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
 
     public Bitmap getBanner(){
         return banner;
+    }
+
+    public void setBanner(Bitmap banner) {
+        this.banner = banner;
+    }
+
+    public Bitmap getSplash() {
+        return splash;
+    }
+
+    public void setSplash(Bitmap splash) {
+        this.splash = splash;
+    }
+
+    public String getSplashUrl() {
+        return splashUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
     }
 
     @Override
@@ -46,38 +70,22 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
 
     @Override
     public void fromJSON(String json){
-        super.fromJSON(json);
         try {
             JSONObject jSponsor = new JSONObject(json);
-            getBannerFromURL(jSponsor.getString("Banner"));
-            try {
-                this.level = SSponsorLevel.valueOf(jSponsor.getString("Level"));
-            } catch (IllegalArgumentException ex){
+            super.fromJSON(jSponsor.getJSONObject("Organization__r").toString());
+            if(jSponsor.has("Sponsor_Level__c"))
+                this.level = jSponsor.isNull("Sponsor_Level__c") ? SSponsorLevel.Friend : SSponsorLevel.valueOf(jSponsor.getString("Sponsor_Level__c"));
+            else
                 this.level = SSponsorLevel.Friend;
-            }
+            if(jSponsor.has("Banner_URL__c"))
+                this.bannerUrl = jSponsor.isNull("Banner_URL__c") ? "https://placehold.it/350x150" : jSponsor.getString("Banner_URL__c");
+            if(jSponsor.has("Splash_Screen_URL__c"))
+                this.splashUrl = jSponsor.isNull("Splash_Screen_URL__c") ? "https://placehold.it/350x600" : jSponsor.getString("Splash_Screen_URL__c");
+            this.type = SOrganizationType.Sponsor;
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-    }
-
-    private void getBannerFromURL(final String urlString){
-        if(!urlString.contains("http"))
-            return;
-        is_banner_loading = true;
-        Thread thread = new Thread(){
-            @Override
-            public void run(){
-                try {
-                    URL url = new URL(urlString);
-                    banner = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    is_banner_loading = false;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        thread.start();
     }
 
     public enum SSponsorLevel{
@@ -96,14 +104,13 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeParcelable(this.banner, flags);
         dest.writeInt(this.level == null ? -1 : this.level.ordinal());
-        dest.writeByte(this.is_banner_loading ? (byte) 1 : (byte) 0);
+        dest.writeString(this.bannerUrl);
+        dest.writeString(this.splashUrl);
         dest.writeString(this.website);
         dest.writeString(this.email);
         dest.writeString(this.phone);
         dest.writeInt(this.type == null ? -1 : this.type.ordinal());
-        dest.writeParcelable(this.image, flags);
         dest.writeString(this.imageUrl);
         dest.writeString(this.summary);
         dest.writeString(this.id);
@@ -112,16 +119,15 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
 
     protected SSponsor(Parcel in) {
         super(in);
-        this.banner = in.readParcelable(Bitmap.class.getClassLoader());
         int tmpLevel = in.readInt();
         this.level = tmpLevel == -1 ? null : SSponsorLevel.values()[tmpLevel];
-        this.is_banner_loading = in.readByte() != 0;
+        this.bannerUrl = in.readString();
+        this.splashUrl = in.readString();
         this.website = in.readString();
         this.email = in.readString();
         this.phone = in.readString();
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : SOrganizationType.values()[tmpType];
-        this.image = in.readParcelable(Bitmap.class.getClassLoader());
         this.imageUrl = in.readString();
         this.summary = in.readString();
         this.id = in.readString();

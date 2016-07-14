@@ -2,12 +2,10 @@ package org.shingo.shingoapp.ui.events;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,61 +16,69 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskComplete;
-import org.shingo.shingoapp.middle.SEvent.SEvent;
+import org.shingo.shingoapp.middle.SEntity.SSponsor;
 import org.shingo.shingoapp.ui.MainActivity;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnEventListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class EventFragment extends Fragment implements OnTaskComplete {
+public class SponsorFragment extends Fragment implements OnTaskComplete{
 
-    private OnEventListFragmentInteractionListener mListener;
-    private MainActivity mainActivity;
+    private static final String ARG_ID = "event_id";
+    private static final String CACHE_KEY = "sponsors";
+    private String mEventId = "";
+    private OnListFragmentInteractionListener mListener;
     private RecyclerView.Adapter mAdapter;
+    private MainActivity mainActivity;
     private ProgressDialog progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public EventFragment() {
+    public SponsorFragment() {
     }
 
-    public static EventFragment newInstance() {
-        return new EventFragment();
+    public static SponsorFragment newInstance(String eventId) {
+        SponsorFragment fragment = new SponsorFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_ID, eventId);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainActivity = (MainActivity)getActivity();
-        mainActivity.setTitle("Upcoming Events");
-        if(mainActivity.needsUpdated()) {
-            mainActivity.updateListPull();
-            GetAsyncData getEventsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events"};
-            getEventsAsync.execute(params);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Events", true);
+        if (getArguments() != null) {
+            mEventId = getArguments().getString(ARG_ID);
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_sponsor_list, container, false);
+        mainActivity = (MainActivity)getActivity();
+        mainActivity.setTitle("Sponsors");
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        mAdapter = new MyEventRecyclerViewAdapter(mainActivity.mEvents, mListener);
+
+        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)){
+            GetAsyncData getSponsorsAsync = new GetAsyncData(this);
+            String[] params = { "/salesforce/events/sponsors", ARG_ID + "=" + mEventId };
+            getSponsorsAsync.execute(params);
+
+            progress = ProgressDialog.show(getContext(), "", "Loading Sponsors...");
+        }
+
+        mAdapter = new MySponsorRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getSponsors(), mListener);
         recyclerView.setAdapter(mAdapter);
 
         return view;
@@ -82,11 +88,11 @@ public class EventFragment extends Fragment implements OnTaskComplete {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnEventListFragmentInteractionListener) {
-            mListener = (OnEventListFragmentInteractionListener) context;
+        if (context instanceof OnListFragmentInteractionListener) {
+            mListener = (OnListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnEventListFragmentInteractionListener");
+                    + " must implement OnListFragmentInteractionListener");
         }
     }
 
@@ -98,7 +104,7 @@ public class EventFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskComplete() {
-        throw new UnsupportedOperationException("This method hasn't been implemented...");
+        throw new UnsupportedOperationException("Not implemented...");
     }
 
     @Override
@@ -106,12 +112,15 @@ public class EventFragment extends Fragment implements OnTaskComplete {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                JSONArray jEvents = result.getJSONArray("events");
-                mainActivity.mEvents.clear();
-                for(int i = 0; i < jEvents.length(); i++){
-                    SEvent event = new SEvent();
-                    event.fromJSON(jEvents.getJSONObject(i).toString());
-                    mainActivity.mEvents.add(event);
+                if(result.has("sponsors")){
+                    mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
+                    mainActivity.mEvents.get(mainActivity.mEventIndex).getSponsors().clear();
+                    JSONArray jSponsors = result.getJSONArray("sponsors");
+                    for(int i = 0; i < jSponsors.length(); i++){
+                        SSponsor sponsor = new SSponsor();
+                        sponsor.fromJSON(jSponsors.getJSONObject(i).toString());
+                        mainActivity.mEvents.get(mainActivity.mEventIndex).getSponsors().add(sponsor);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -139,7 +148,7 @@ public class EventFragment extends Fragment implements OnTaskComplete {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnEventListFragmentInteractionListener {
-        void onEventListFragmentInteraction(SEvent event);
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentInteraction(SSponsor item);
     }
 }

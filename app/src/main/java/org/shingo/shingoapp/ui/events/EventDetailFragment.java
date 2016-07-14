@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import java.util.TimeZone;
 public class EventDetailFragment extends Fragment implements OnTaskComplete {
 
     private static final String ARG_ID = "event_id";
+    private static final String CACHE_KEY = "event";
     private String mEventId;
     private OnEventFragmentInteractionListener mListener;
     private ProgressDialog progress;
@@ -78,10 +80,13 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
             mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
             return null;
         }
-        GetAsyncData getEventAsync = new GetAsyncData(this);
-        getEventAsync.execute("/salesforce/events/" + mEventId);
-        progress = ProgressDialog.show(getContext(), "", "Loading Event...");
-
+        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
+            GetAsyncData getEventAsync = new GetAsyncData(this);
+            getEventAsync.execute("/salesforce/events/" + mEventId);
+            progress = ProgressDialog.show(getContext(), "", "Loading Event...");
+        } else {
+            updateViews();
+        }
         (view.findViewById(R.id.event_agenda)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,6 +109,18 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
             @Override
             public void onClick(View view) {
                 mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_exhibitors));
+            }
+        });
+        (view.findViewById(R.id.event_recipients)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_recipients));
+            }
+        });
+        (view.findViewById(R.id.event_sponsors)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_sponsors));
             }
         });
 
@@ -135,6 +152,15 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
         mListener = null;
     }
 
+    private void updateViews(){
+        SEvent event = mainActivity.mEvents.get(mainActivity.mEventIndex);
+        ((TextView)view.findViewById(R.id.event_name)).setText(event.getName());
+        ((TextView)view.findViewById(R.id.event_location)).setText(event.getDisplayLocation());
+        ((TextView)view.findViewById(R.id.event_dates)).setText(formatEventDates(event.getStart(), event.getEnd()));
+        ((TextView)view.findViewById(R.id.event_registration)).setText("Register: " + event.getRegistration());
+        ((TextView)view.findViewById(R.id.event_sales_text)).setText(Html.fromHtml(event.getSalesText()));
+    }
+
     @Override
     public void onTaskComplete() {
         throw new UnsupportedOperationException("Not implemented...");
@@ -146,18 +172,14 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
                 if(result.has("event")){
+                    mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
                     mainActivity.mEvents.get(mainActivity.mEventIndex).fromJSON(result.getJSONObject("event").toString());
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        SEvent event = mainActivity.mEvents.get(mainActivity.mEventIndex);
-        ((TextView)view.findViewById(R.id.event_name)).setText(event.getName());
-        ((TextView)view.findViewById(R.id.event_location)).setText(event.getDisplayLocation());
-        ((TextView)view.findViewById(R.id.event_dates)).setText(formatEventDates(event.getStart(), event.getEnd()));
-        ((TextView)view.findViewById(R.id.event_registration)).setText("Register: " + event.getRegistration());
-        ((TextView)view.findViewById(R.id.event_sales_text)).setText(Html.fromHtml(event.getSalesText()));
+        updateViews();
         progress.dismiss();
     }
 
@@ -190,7 +212,7 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskError(String error) {
-        // TODO: Handle error
+        mainActivity.handleError(error);
         progress.dismiss();
     }
 

@@ -24,6 +24,10 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
     private String author;
     public SRecipientAward award;
 
+    public SRecipient(){
+
+    }
+
     public SRecipient(String id, String name, String author, String summary, Bitmap image,
                       SRecipientAward award){
         super(id, name, summary, image);
@@ -36,8 +40,9 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
         super.fromJSON(json);
         try {
             JSONObject jsonRecipient = new JSONObject(json);
-            this.author = (jsonRecipient.getString("Author").equals("null") ? null : jsonRecipient.getString("Author"));
-            getTypeFromString(jsonRecipient.getString("Award"));
+
+            if(jsonRecipient.has("Award_Type__c"))
+                getTypeFromString(jsonRecipient.getString("Award_Type__c"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -62,7 +67,7 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
 
     @Override
     protected void getTypeFromString(String type) {
-        this.award = SRecipientAward.valueOf(type);
+        this.award = SRecipientAward.valueOf(type.replace("\\s",""));
     }
 
     public String getAuthor(){
@@ -106,7 +111,6 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.author);
         dest.writeInt(this.award == null ? -1 : this.award.ordinal());
-        dest.writeParcelable(this.image, flags);
         dest.writeString(this.imageUrl);
         dest.writeString(this.summary);
         dest.writeString(this.id);
@@ -117,7 +121,6 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
         this.author = in.readString();
         int tmpAward = in.readInt();
         this.award = tmpAward == -1 ? null : SRecipientAward.values()[tmpAward];
-        this.image = in.readParcelable(Bitmap.class.getClassLoader());
         this.imageUrl = in.readString();
         this.summary = in.readString();
         this.id = in.readString();

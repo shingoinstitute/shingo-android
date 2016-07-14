@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A fragment representing a list of {@link SSession}s.
@@ -185,14 +186,14 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     }
 
     private String getDayFromDate(Date date){
-        SimpleDateFormat formatter = new SimpleDateFormat("EEEE");
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE", Locale.getDefault());
         return formatter.format(date);
     }
 
     @Override
     public void onTaskError(String error) {
+        mainActivity.handleError(error);
         progress.dismiss();
-        // TODO: Create and show Error Dialog
     }
 
     /**

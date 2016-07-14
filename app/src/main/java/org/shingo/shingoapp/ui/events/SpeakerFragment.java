@@ -195,6 +195,7 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskError(String error) {
+        mainActivity.handleError(error);
         progress.dismiss();
     }
 

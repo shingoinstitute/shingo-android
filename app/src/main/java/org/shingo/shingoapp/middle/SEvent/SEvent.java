@@ -253,7 +253,6 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         dest.writeString(this.primaryColor);
         dest.writeString(this.bannerUrl);
         dest.writeString(this.salesText);
-        dest.writeParcelable(this.banner, flags);
         dest.writeTypedList(this.agenda);
         dest.writeTypedList(this.speakers);
         dest.writeTypedList(this.sessions);
@@ -281,7 +280,6 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         this.primaryColor = in.readString();
         this.bannerUrl = in.readString();
         this.salesText = in.readString();
-        this.banner = in.readParcelable(Bitmap.class.getClassLoader());
         this.agenda = in.createTypedArrayList(SDay.CREATOR);
         this.speakers = in.createTypedArrayList(SPerson.CREATOR);
         this.sessions = in.createTypedArrayList(SSession.CREATOR);

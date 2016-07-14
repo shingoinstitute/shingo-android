@@ -112,7 +112,6 @@ public class SOrganization extends SEntity implements Comparable<SObject>,Parcel
         dest.writeString(this.email);
         dest.writeString(this.phone);
         dest.writeInt(this.type == null ? -1 : this.type.ordinal());
-        dest.writeParcelable(this.image, flags);
         dest.writeString(this.imageUrl);
         dest.writeString(this.summary);
         dest.writeString(this.id);
@@ -125,7 +124,6 @@ public class SOrganization extends SEntity implements Comparable<SObject>,Parcel
         this.phone = in.readString();
         int tmpType = in.readInt();
         this.type = tmpType == -1 ? null : SOrganizationType.values()[tmpType];
-        this.image = in.readParcelable(Bitmap.class.getClassLoader());
         this.imageUrl = in.readString();
         this.summary = in.readString();
         this.id = in.readString();

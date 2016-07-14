@@ -64,20 +64,22 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_exhibitor_list, container, false);
 
-        // Set the adapter
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view;
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         mainActivity = (MainActivity) getActivity();
-        mAdapter = new MyExhibitorRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getExhibitors(), mListener);
-        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)){
+        mainActivity.setTitle("Exhibitors");
+
+        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
             GetAsyncData getExhibitorsAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/exhibitors", ARG_ID + "=" + mEventId};
             getExhibitorsAsync.execute(params);
             progress = ProgressDialog.show(getContext(), "", "Loading Exhibitors");
-        } else {
-            recyclerView.setAdapter(mAdapter);
         }
+
+        mAdapter = new MyExhibitorRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getExhibitors(), mListener);
+
+        RecyclerView recyclerView = (RecyclerView) view;
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setAdapter(mAdapter);
 
         return view;
     }
@@ -132,7 +134,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskError(String error) {
-        // TODO: Handle error
+        mainActivity.handleError(error);
         progress.dismiss();
     }
 
@@ -147,7 +149,6 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(SOrganization org);
     }
 }

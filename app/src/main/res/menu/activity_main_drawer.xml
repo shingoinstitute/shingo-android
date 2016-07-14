@@ -24,6 +24,14 @@
                     android:id="@+id/nav_exhibitors"
                     android:icon="@drawable/ic_local_offer"
                     android:title="Exhibitors" />
+                <item
+                    android:id="@+id/nav_recipients"
+                    android:icon="@drawable/ic_stars"
+                    android:title="Recipients" />
+                <item
+                    android:id="@+id/nav_sponsors"
+                    android:icon="@drawable/ic_bookmark"
+                    android:title="Sponsors" />
             </menu>
         </item>
         <item android:title="Shingo App">

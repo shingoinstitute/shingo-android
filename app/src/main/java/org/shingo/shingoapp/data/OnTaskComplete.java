@@ -7,9 +7,11 @@ package org.shingo.shingoapp.data;
  * @author Dustin Homan
  */
 public interface OnTaskComplete {
+
     /**
      * Callback used when nothing is expected back
      */
+    @SuppressWarnings("unused")
     void onTaskComplete();
 
     /**
@@ -18,5 +20,11 @@ public interface OnTaskComplete {
      */
     void onTaskComplete(String response);
 
+    /**
+     * Callback used when an error happens during
+     * the asynchronous task that results in no
+     * response from the server.
+     * @param error String to pass back to the user describing the error
+     */
     void onTaskError(String error);
 }
