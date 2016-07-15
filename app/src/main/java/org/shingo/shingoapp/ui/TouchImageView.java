@@ -1,5 +1,5 @@
 package org.shingo.shingoapp.ui;
-/*
+/**
  * TouchImageView.java
  * By: Michael Ortiz
  * Updated By: Patrick Lackemacher
@@ -140,10 +140,12 @@ public class TouchImageView extends ImageView {
         userTouchListener = l;
     }
 
+    @SuppressWarnings("unused")
     public void setOnTouchImageViewListener(OnTouchImageViewListener l) {
         touchImageViewListener = l;
     }
 
+    @SuppressWarnings("unused")
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener l) {
         doubleTapListener = l;
     }
@@ -213,6 +215,7 @@ public class TouchImageView extends ImageView {
      * Return a Rect representing the zoomed image.
      * @return rect representing zoomed image
      */
+    @SuppressWarnings("unused")
     public RectF getZoomedRect() {
         if (mScaleType == ScaleType.FIT_XY) {
             throw new UnsupportedOperationException("getZoomedRect() not supported with FIT_XY");
@@ -295,6 +298,7 @@ public class TouchImageView extends ImageView {
      * Get the max zoom multiplier.
      * @return max zoom multiplier.
      */
+    @SuppressWarnings("unused")
     public float getMaxZoom() {
         return maxScale;
     }
@@ -303,6 +307,7 @@ public class TouchImageView extends ImageView {
      * Set the max zoom multiplier. Default value: 3.
      * @param max max zoom multiplier.
      */
+    @SuppressWarnings("unused")
     public void setMaxZoom(float max) {
         maxScale = max;
         superMaxScale = SUPER_MAX_MULTIPLIER * maxScale;
@@ -312,6 +317,7 @@ public class TouchImageView extends ImageView {
      * Get the min zoom multiplier.
      * @return min zoom multiplier.
      */
+    @SuppressWarnings("unused")
     public float getMinZoom() {
         return minScale;
     }
@@ -329,6 +335,7 @@ public class TouchImageView extends ImageView {
      * Set the min zoom multiplier. Default value: 1.
      * @param min min zoom multiplier.
      */
+    @SuppressWarnings("unused")
     public void setMinZoom(float min) {
         minScale = min;
         superMinScale = SUPER_MIN_MULTIPLIER * minScale;
@@ -346,6 +353,7 @@ public class TouchImageView extends ImageView {
      * Set zoom to the specified scale. Image will be centered by default.
      * @param scale
      */
+    @SuppressWarnings({"unused", "JavaDoc"})
     public void setZoom(float scale) {
         setZoom(scale, 0.5f, 0.5f);
     }
@@ -359,6 +367,7 @@ public class TouchImageView extends ImageView {
      * @param focusX
      * @param focusY
      */
+    @SuppressWarnings("JavaDoc")
     public void setZoom(float scale, float focusX, float focusY) {
         setZoom(scale, focusX, focusY, mScaleType);
     }
@@ -373,6 +382,7 @@ public class TouchImageView extends ImageView {
      * @param focusY
      * @param scaleType
      */
+    @SuppressWarnings("JavaDoc")
     public void setZoom(float scale, float focusX, float focusY, ScaleType scaleType) {
         //
         // setZoom can be called before the image is on the screen, but at this point,
@@ -402,6 +412,7 @@ public class TouchImageView extends ImageView {
      * and ScaleType.
      * @param img
      */
+    @SuppressWarnings("JavaDoc")
     public void setZoom(TouchImageView img) {
         PointF center = img.getScrollPosition();
         setZoom(img.getCurrentZoom(), center.x, center.y, img.getScaleType());
@@ -434,6 +445,7 @@ public class TouchImageView extends ImageView {
      * @param focusX
      * @param focusY
      */
+    @SuppressWarnings({"JavaDoc", "unused"})
     public void setScrollPosition(float focusX, float focusY) {
         setZoom(normalizedScale, focusX, focusY);
     }
@@ -654,10 +666,11 @@ public class TouchImageView extends ImageView {
      *
      * @param mode
      * @param size
-     * @param drawableWidth
+     * @param dimen
      * @return
      */
-    private int setViewSize(int mode, int size, int drawableWidth) {
+    @SuppressWarnings("JavaDoc")
+    private int setViewSize(int mode, int size, int dimen) {
         int viewSize;
         switch (mode) {
             case MeasureSpec.EXACTLY:
@@ -665,11 +678,11 @@ public class TouchImageView extends ImageView {
                 break;
 
             case MeasureSpec.AT_MOST:
-                viewSize = Math.min(drawableWidth, size);
+                viewSize = Math.min(dimen, size);
                 break;
 
             case MeasureSpec.UNSPECIFIED:
-                viewSize = drawableWidth;
+                viewSize = dimen;
                 break;
 
             default:
@@ -719,6 +732,7 @@ public class TouchImageView extends ImageView {
         this.state = state;
     }
 
+    @SuppressWarnings("unused")
     public boolean canScrollHorizontallyFroyo(int direction) {
         return canScrollHorizontally(direction);
     }
@@ -796,10 +810,7 @@ public class TouchImageView extends ImageView {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            if(doubleTapListener != null) {
-                return doubleTapListener.onDoubleTapEvent(e);
-            }
-            return false;
+            return doubleTapListener != null && doubleTapListener.onDoubleTapEvent(e);
         }
     }
 
@@ -1021,6 +1032,7 @@ public class TouchImageView extends ImageView {
          * of the zoom.
          * @param t
          */
+        @SuppressWarnings("JavaDoc")
         private void translateImageToCenterTouchPosition(float t) {
             float targetX = startTouch.x + t * (endTouch.x - startTouch.x);
             float targetY = startTouch.y + t * (endTouch.y - startTouch.y);
@@ -1032,6 +1044,7 @@ public class TouchImageView extends ImageView {
          * Use interpolator to get t
          * @return
          */
+        @SuppressWarnings("JavaDoc")
         private float interpolate() {
             long currTime = System.currentTimeMillis();
             float elapsed = (currTime - startTime) / ZOOM_TIME;
@@ -1045,6 +1058,7 @@ public class TouchImageView extends ImageView {
          * @param t
          * @return
          */
+        @SuppressWarnings("JavaDoc")
         private double calculateDeltaScale(float t) {
             double zoom = startZoom + t * (targetZoom - startZoom);
             return zoom / normalizedScale;
@@ -1267,6 +1281,7 @@ public class TouchImageView extends ImageView {
         }
     }
 
+    @SuppressWarnings("unused")
     private void printMatrixInfo() {
         float[] n = new float[9];
         matrix.getValues(n);

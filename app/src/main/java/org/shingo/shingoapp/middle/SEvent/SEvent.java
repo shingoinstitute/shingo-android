@@ -78,6 +78,7 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         return registration;
     }
 
+    @SuppressWarnings("unused")
     public SVenue getVenue(){
         return venue;
     }
@@ -86,14 +87,17 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         return displayLocation;
     }
 
+    @SuppressWarnings("unused")
     public String getCity() {
         return city;
     }
 
+    @SuppressWarnings("unused")
     public String getPrimaryColor() {
         return primaryColor;
     }
 
+    @SuppressWarnings("unused")
     public String getCountry() {
         return country;
     }
@@ -185,9 +189,9 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         try {
             JSONObject jsonEvent = new JSONObject(json);
             if(jsonEvent.has("Start_Date__c"))
-                this.start = formatDateString(jsonEvent.getString("Start_Date__c"));
+                this.start = parseDateString(jsonEvent.getString("Start_Date__c"));
             if(jsonEvent.has("End_Date__c"))
-                this.end = formatDateString(jsonEvent.getString("End_Date__c"));
+                this.end = parseDateString(jsonEvent.getString("End_Date__c"));
             if(jsonEvent.has("Registration_Link__c"))
                 this.registration = (jsonEvent.isNull("Registration_Link__c") ? "http://events.shingo.org" : jsonEvent.getString("Registration_Link__c"));
 
@@ -286,7 +290,7 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         this.exhibitors = in.createTypedArrayList(SOrganization.CREATOR);
         this.sponsors = in.createTypedArrayList(SSponsor.CREATOR);
         int lastDataPullSize = in.readInt();
-        this.lastDataPull = new HashMap<String, Date>(lastDataPullSize);
+        this.lastDataPull = new HashMap<>(lastDataPullSize);
         for (int i = 0; i < lastDataPullSize; i++) {
             String key = in.readString();
             long tmpValue = in.readLong();

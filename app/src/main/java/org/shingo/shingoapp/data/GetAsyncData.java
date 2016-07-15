@@ -1,6 +1,7 @@
 package org.shingo.shingoapp.data;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 /**
  * This class is used to make an asynchronous call to
@@ -19,19 +21,21 @@ import java.net.URLConnection;
  */
 public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
 
-    private OnTaskComplete mListener;
+    private static final Object MUTEX = new Object();
+    private static final String API_URL = "https://api.shingo.org";
+    private static final String LOG_TAG = "GetAsyncData";
     private static boolean isWorking = false;
-    private final static Object mutex = new Object();
-    private final static String API_URL = "https://api.shingo.org";
-    String output;
+    private OnTaskCompleteListener mListener;
+    private String output;
+    private Exception exception;
 
     /**
      * Constructor
      * @param listener the callback to call when task is complete
      */
-    public GetAsyncData(OnTaskComplete listener) {
+    public GetAsyncData(OnTaskCompleteListener listener) {
         mListener = listener;
-        System.out.println("GetAsyncData created");
+        Log.d(LOG_TAG, "GetAsyncData created for " + listener.getClass().getName());
     }
 
     /**
@@ -42,11 +46,11 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
      */
     @Override
     protected Boolean doInBackground(String... params) {
-        System.out.println("GetAsyncData.doInBackground called");
-        synchronized (mutex) {
+        Log.d(LOG_TAG, "doInBackground(" + Arrays.toString(params) + ")");
+        synchronized (MUTEX) {
             if (isWorking) {
                 try {
-                    mutex.wait();
+                    MUTEX.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -56,9 +60,7 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
         }
 
         try {
-            String urlString = API_URL + params[0] + (params.length > 1 ? "?" + params[1] : "");
-            URL url = new URL( urlString );
-            URLConnection conn = url.openConnection();
+            URLConnection conn = new URL( API_URL + params[0] + (params.length > 1 ? "?" + params[1] : "") ).openConnection();
             if(params.length > 2){
                 conn.setDoOutput(true);
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
@@ -73,12 +75,11 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
                 sb.append(line);
             }
             output = sb.toString();
-            System.out.println("GetAsyncData for " + url.toExternalForm() + ": " + output);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            exception = e;
             return false;
         } catch (IOException e) {
-            e.printStackTrace();
+            exception = e;
             return false;
         }
 
@@ -87,22 +88,23 @@ public class GetAsyncData extends AsyncTask<String, Void, Boolean> {
 
     /**
      * This method is called when {@link GetAsyncData#doInBackground(String...)} is finished.
-     * Calls {@link OnTaskComplete#onTaskComplete(String)} if API call was successful
+     * Calls {@link OnTaskCompleteListener#onTaskComplete(String)} if API call was successful and
+     * calls {@link OnTaskCompleteListener#onTaskError(String)} if there was an error.
      *
      * @param success the return value of {@link GetAsyncData#doInBackground(String...)}
      */
     @Override
     protected void onPostExecute(final Boolean success) {
-        synchronized (mutex) {
+        synchronized (MUTEX) {
             isWorking = false;
-            mutex.notifyAll();
+            MUTEX.notifyAll();
         }
         if (success) {
-            System.out.println("GetAsyncData completed");
+            Log.d(LOG_TAG, "Output " + output);
             mListener.onTaskComplete(output);
         } else {
-            mListener.onTaskError("An error occurred getting data...");
-            System.out.println("An error occurred in GetAsyncData...");
+            Log.d(LOG_TAG, exception.getMessage(), exception.getCause());
+            mListener.onTaskError(exception.getMessage());
         }
     }
 }

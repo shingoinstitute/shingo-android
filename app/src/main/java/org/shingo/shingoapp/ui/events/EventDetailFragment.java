@@ -2,11 +2,9 @@ package org.shingo.shingoapp.ui.events;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +14,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
-import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.ui.interfaces.NavigationInterface;
+import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
+import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,25 +28,29 @@ import java.util.TimeZone;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnEventFragmentInteractionListener} interface
- * to handle interaction events.
+ * </p>
  * Use the {@link EventDetailFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class EventDetailFragment extends Fragment implements OnTaskComplete {
+public class EventDetailFragment extends Fragment implements OnTaskCompleteListener {
 
     private static final String ARG_ID = "event_id";
     private static final String CACHE_KEY = "event";
     private String mEventId;
-    private OnEventFragmentInteractionListener mListener;
+
+    private NavigationInterface mNavigate;
+    private EventInterface mEvents;
+    private OnErrorListener mErrorListener;
+
     private ProgressDialog progress;
-    private MainActivity mainActivity;
+    private SEvent mEvent;
     private View view;
 
-    public EventDetailFragment() {
-        // Required empty public constructor
-    }
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
+    public EventDetailFragment() {}
 
     /**
      * Use this factory method to create a new instance of
@@ -75,114 +80,72 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_event_detail, container, false);
-        mainActivity = (MainActivity) getActivity();
-        if(mainActivity.mEvents.size() == 0){
-            mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
+        MainActivity mainActivity = (MainActivity) getActivity();
+
+        mEvent = mEvents.get(mEventId);
+
+        if(mEvent == null){
+            mNavigate.navigateToId(R.id.nav_events);
             return null;
         }
-        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
+
+        if(mEvent.needsUpdated(CACHE_KEY)) {
             GetAsyncData getEventAsync = new GetAsyncData(this);
             getEventAsync.execute("/salesforce/events/" + mEventId);
             progress = ProgressDialog.show(getContext(), "", "Loading Event...");
         } else {
             updateViews();
         }
+
+        setOnClickListeners();
+
+        mainActivity.setTitle(mEvent.getName());
+        mainActivity.toggleNavHeader(1);
+        return view;
+    }
+
+
+
+    public void setOnClickListeners(){
         (view.findViewById(R.id.event_agenda)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_agenda));
+                mNavigate.navigateToId(R.id.nav_agenda);
             }
         });
         (view.findViewById(R.id.event_sessions)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_sessions));
+                mNavigate.navigateToId(R.id.nav_sessions);
             }
         });
         (view.findViewById(R.id.event_speakers)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_speakers));
+                mNavigate.navigateToId(R.id.nav_speakers);
             }
         });
         (view.findViewById(R.id.event_exhibitors)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_exhibitors));
+                mNavigate.navigateToId(R.id.nav_exhibitors);
             }
         });
         (view.findViewById(R.id.event_recipients)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_recipients));
+                mNavigate.navigateToId(R.id.nav_recipients);
             }
         });
         (view.findViewById(R.id.event_sponsors)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_sponsors));
+                mNavigate.navigateToId(R.id.nav_sponsors);
             }
         });
-
-        mainActivity.setTitle(mainActivity.mEvents.get(mainActivity.mEventIndex).getName());
-        return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnEventFragmentInteractionListener) {
-            mListener = (OnEventFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnEventFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    private void updateViews(){
-        SEvent event = mainActivity.mEvents.get(mainActivity.mEventIndex);
-        ((TextView)view.findViewById(R.id.event_name)).setText(event.getName());
-        ((TextView)view.findViewById(R.id.event_location)).setText(event.getDisplayLocation());
-        ((TextView)view.findViewById(R.id.event_dates)).setText(formatEventDates(event.getStart(), event.getEnd()));
-        ((TextView)view.findViewById(R.id.event_registration)).setText("Register: " + event.getRegistration());
-        ((TextView)view.findViewById(R.id.event_sales_text)).setText(Html.fromHtml(event.getSalesText()));
-    }
-
-    @Override
-    public void onTaskComplete() {
-        throw new UnsupportedOperationException("Not implemented...");
-    }
-
-    @Override
-    public void onTaskComplete(String response) {
-        try {
-            JSONObject result = new JSONObject(response);
-            if(result.getBoolean("success")){
-                if(result.has("event")){
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).fromJSON(result.getJSONObject("event").toString());
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        updateViews();
-        progress.dismiss();
-    }
-
+    @SuppressWarnings("deprecation")
     public String formatEventDates(Date start, Date end){
         int deltaYear = start.getYear() - end.getYear();
         int deltaMonth = start.getMonth() - end.getMonth();
@@ -210,24 +173,63 @@ public class EventDetailFragment extends Fragment implements OnTaskComplete {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    private void updateViews(){
+        ((TextView)view.findViewById(R.id.event_name)).setText(mEvent.getName());
+        ((TextView)view.findViewById(R.id.event_location)).setText(mEvent.getDisplayLocation());
+        ((TextView)view.findViewById(R.id.event_dates)).setText(formatEventDates(mEvent.getStart(), mEvent.getEnd()));
+        ((TextView)view.findViewById(R.id.event_registration)).setText(String.format("Register: %s", mEvent.getRegistration()));
+        ((TextView)view.findViewById(R.id.event_sales_text)).setText(Html.fromHtml(mEvent.getSalesText()));
+    }
+
     @Override
-    public void onTaskError(String error) {
-        mainActivity.handleError(error);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnErrorListener)
+            mErrorListener = (OnErrorListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if (context instanceof EventInterface)
+            mEvents = (EventInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if (context instanceof NavigationInterface)
+            mNavigate = (NavigationInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement NavigationInterface");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mErrorListener = null;
+        mEvents = null;
+        mNavigate = null;
+    }
+
+    @Override
+    public void onTaskComplete(String response) {
+        try {
+            JSONObject result = new JSONObject(response);
+            if(result.getBoolean("success")){
+                if(result.has("event")){
+                    mEvent.updatePullTime(CACHE_KEY);
+                    mEvent.fromJSON(result.getJSONObject("event").toString());
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        updateViews();
         progress.dismiss();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnEventFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    @Override
+    public void onTaskError(String error) {
+        mErrorListener.handleError(error);
+        progress.dismiss();
     }
 }

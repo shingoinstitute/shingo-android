@@ -1,18 +1,14 @@
 package org.shingo.shingoapp.middle.SEntity;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.text.Html;
-import android.view.View;
-import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SObject;
-import org.shingo.shingoapp.R;
 
 /**
  * This class is the data holder for
@@ -25,12 +21,41 @@ import org.shingo.shingoapp.R;
  */
 public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
 
+    /**
+     * Person's title
+     */
     private String title;
+
+    /**
+     * Person's company
+     */
     private String company;
+
+    /**
+     * See {@link SPersonType}
+     */
     public SPersonType type;
 
     public SPerson(){}
 
+    /**
+     * Constructor to parse from JSON string
+     * @param json JSON {@link String} representing a Person
+     */
+    public SPerson(String json){
+        fromJSON(json);
+    }
+
+    /**
+     * @param id Salesforce Id
+     * @param name Person's name
+     * @param title Person's title
+     * @param company Person's company
+     * @param summary A brief biography of the Person
+     * @param image A profile picture of the Person
+     * @param type The Person's type {@link SPersonType}
+     */
+    @SuppressWarnings("unused")
     public SPerson(String id, String name, String title, String company, String summary,
                    Bitmap image, SPersonType type){
         super(id, name, summary, image);
@@ -39,44 +64,51 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         this.type = type;
     }
 
-    public SPerson(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Setter for {@link #type}
+     * @param type {@link String} representing {@link SPersonType}
+     */
     @Override
-    protected void getTypeFromString(String type){
-        switch (type){
-            case "Keynote Speaker":
-            case "KeynoteSpeaker":
-                this.type = SPersonType.KeynoteSpeaker;
-            case "Board Member":
-            case "BoardMember":
-                this.type = SPersonType.BoardMember;
-            case "Academy Member":
-            case "AcademyMember":
-                this.type = SPersonType.AcademyMember;
-            case "Concurrent Speaker":
-            case "ConcurrentSpeaker":
-            default:
-                this.type = SPersonType.ConcurrentSpeaker;
-        }
+    protected void setTypeFromString(String type){
+        this.type = SPersonType.valueOf(type.replace("\\s", ""));
     }
 
+    /**
+     * Parse a Person from a JSON string
+     * @param json JSON {@link String} representing a Person
+     */
     @Override
     public void fromJSON(String json) {
         super.fromJSON(json);
         try {
             JSONObject jPerson = new JSONObject(json);
-            title = (jPerson.isNull("Speaker_Title__c") ? null : jPerson.getString("Speaker_Title__c"));
-            if(!jPerson.isNull("Organization__r"))
-                company = jPerson.getJSONObject("Organization__r").getString("Name");
-            else
-                company = "";
+            if(jPerson.has("Speaker_Title__c"))
+                this.title = (jPerson.isNull("Speaker_Title__c") ? null : jPerson.getString("Speaker_Title__c"));
+            if(jPerson.has("Organization__r"))
+                this.company = jPerson.isNull("Organization__r") ? "" : jPerson.getJSONObject("Organization__r").getString("Name");
+            if(jPerson.has("Session_Speaker_Associations__r") && !jPerson.isNull("Session_Speaker_Associations__r")){
+                JSONArray array = jPerson.getJSONObject("Session_Speaker_Associations").getJSONArray("records");
+                for(int i = 0; i < array.length(); i++){
+                    JSONObject obj = array.getJSONObject(i);
+                    if(obj.getJSONObject("Session__r").has("Session_Display_Name__c") && !obj.getJSONObject("Session__r").isNull("Session_Display_Name__c")) {
+                        if (obj.getJSONObject("Session__r").getString("Session_Display_Name__c").toLowerCase().contains("keynote")) {
+                            this.type = SPersonType.KeynoteSpeaker;
+                            break;
+                        }
+                    }
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Sorts Person's by their last name
+     * @param a {@link SPerson}
+     * @return {@link String#compareTo(String)} on the last names of the people
+     * @throws ClassCastException
+     */
     @Override
     public int compareTo(@NonNull SObject a) throws ClassCastException{
         if(!(a instanceof SPerson)){
@@ -92,26 +124,35 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         return compareLast;
     }
 
+    /**
+     * Getter for {@link #title}
+     * @return {@link #title}
+     */
     public String getTitle(){
         return title;
     }
 
+    /**
+     * Getter for {@link #company}
+     * @return {@link #company}
+     */
+    @SuppressWarnings("unused")
     public String getCompany(){
         return company;
     }
 
+    /**
+     * Getter for Person's Detail
+     * @return {@link #title}, {@link #company}
+     */
     @Override
     public String getDetail() {
         return (title != null ? title + (company != null ? ", " + company : "") : company);
     }
 
-    @Override
-    public View getContent(Context context) {
-        View contentView = View.inflate(context, R.layout.sperson_content_view, null);
-        ((TextView) contentView).setText(Html.fromHtml(summary));
-        return contentView;
-    }
-
+    /**
+     * {@link Enum} describing a Person's type
+     */
     public enum SPersonType {
         KeynoteSpeaker("Keynote Speaker"),
         ConcurrentSpeaker("Concurrent Speaker"),
@@ -129,11 +170,21 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         }
     }
 
+
+    /**
+     * Implementation of {@link Parcelable#describeContents()}
+     * @return 0
+     */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * Implementation of {@link Parcelable#writeToParcel(Parcel, int)}
+     * @param dest {@link Parcel}
+     * @param flags {@link int}
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.title);
@@ -145,6 +196,10 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         dest.writeString(this.name);
     }
 
+    /**
+     * Constructor from {@link Parcel}
+     * @param in {@link Parcel}
+     */
     protected SPerson(Parcel in) {
         this.title = in.readString();
         this.company = in.readString();
@@ -156,12 +211,26 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         this.name = in.readString();
     }
 
+    /**
+     * Implementation of {@link android.os.Parcelable.Creator}
+     */
     public static final Parcelable.Creator<SPerson> CREATOR = new Parcelable.Creator<SPerson>() {
+
+        /**
+         * Implementation of {@link android.os.Parcelable.Creator#createFromParcel(Parcel)}
+         * @param source {@link Parcel}
+         * @return A Person created from source
+         */
         @Override
         public SPerson createFromParcel(Parcel source) {
             return new SPerson(source);
         }
 
+        /**
+         * Implementation of {@link android.os.Parcelable.Creator#newArray(int)}
+         * @param size Size of the new Person array
+         * @return a new Person array
+         */
         @Override
         public SPerson[] newArray(int size) {
             return new SPerson[size];

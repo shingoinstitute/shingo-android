@@ -15,9 +15,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
-import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.data.OnTaskCompleteListener;
+import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.middle.SEvent.SSession;
-import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
+import org.shingo.shingoapp.ui.events.viewadapters.MySessionRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.events.viewadapters.MySessionSectionedRecylclerViewAdapter;
+import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,22 +33,27 @@ import java.util.Locale;
 /**
  * A fragment representing a list of {@link SSession}s.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnSessionListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class SessionFragment extends Fragment implements OnTaskComplete{
+public class SessionFragment extends Fragment implements OnTaskCompleteListener {
 
-    private static final String ARG_ID = "ids";
+    private static final String ARG_SESSION_IDS = "session_ids";
+    private static final String ARG_EVENT_ID = "event_id";
+    private static final String ARG_AGENDA_ID = "agenda_id";
     private static final String CACHE_KEY = "sessions";
     private boolean isSectioned = true;
-    private ArrayList<String> mIds;
-    private List<SectionedSessionDataModel> data = new ArrayList<>();
+    private ArrayList<String> mSessionIds;
+    private String mEventId;
     private String mAgendaId;
-    private OnSessionListFragmentInteractionListener mListener;
+    private List<SectionedSessionDataModel> data = new ArrayList<>();
+
+    private OnListFragmentInteractionListener mListener;
+    private OnErrorListener mErrorListener;
+    private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
-    private MainActivity mainActivity;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -53,15 +62,20 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     public SessionFragment() {
     }
 
-    public static SessionFragment newInstance(){
-        return new SessionFragment();
-    }
-
-    public static SessionFragment newInstance(ArrayList<String> ids, String agenda_id) {
+    public static SessionFragment newInstance(String eventId){
         SessionFragment fragment = new SessionFragment();
         Bundle args = new Bundle();
-        args.putString("agenda_id", agenda_id);
-        args.putStringArrayList(ARG_ID, ids);
+        args.putString(ARG_EVENT_ID, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SessionFragment newInstance(ArrayList<String> ids, String agendaId, String eventId) {
+        SessionFragment fragment = new SessionFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_AGENDA_ID, agendaId);
+        args.putString(ARG_EVENT_ID, eventId);
+        args.putStringArrayList(ARG_SESSION_IDS, ids);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,9 +85,12 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mIds = getArguments().getStringArrayList(ARG_ID);
-            mAgendaId = getArguments().getString("agenda_id");
-            isSectioned = false;
+            if(getArguments().containsKey(ARG_SESSION_IDS))
+                mSessionIds = getArguments().getStringArrayList(ARG_SESSION_IDS);
+            if(getArguments().containsKey(ARG_AGENDA_ID))
+                mAgendaId = getArguments().getString(ARG_AGENDA_ID);
+            mEventId = getArguments().getString(ARG_EVENT_ID);
+            isSectioned = !getArguments().containsKey(ARG_SESSION_IDS);
         }
     }
 
@@ -81,40 +98,26 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_session_list, container, false);
-        mainActivity = (MainActivity)getActivity();
-        mainActivity.setTitle("Sessions");
-        if(mainActivity.mEvents.size() == 0){
-            mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
-            return null;
+        getActivity().setTitle("Sessions");
+
+        SEvent event = mEvents.get(mEventId);
+
+        if(!isSectioned && event.hasCache(CACHE_KEY)) {
+            mAdapter = new MySessionRecyclerViewAdapter(event.getSubsetSessions(mSessionIds), mListener);
+        } else if(event.needsUpdated(CACHE_KEY)) {
+            GetAsyncData getSessionsAsync = new GetAsyncData(this);
+            getSessionsAsync.execute("/salesforce/events/sessions/", (mAgendaId == null ? ARG_EVENT_ID + "=" + mEventId : ARG_AGENDA_ID + "=" + mAgendaId));
+            mAdapter = isSectioned ? new MySessionSectionedRecylclerViewAdapter(data, mListener) : new MySessionRecyclerViewAdapter(event.getSessions(), mListener);
+
+            progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
+        } else {
+            sectionSessions(event.getSessions());
+            mAdapter = new MySessionSectionedRecylclerViewAdapter(data, mListener);
         }
-        int eventIndex = mainActivity.mEventIndex;
 
         Context context = view.getContext();
         RecyclerView mRecyclerView = (RecyclerView) view;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-        if(!isSectioned && mainActivity.mEvents.get(eventIndex).hasCache(CACHE_KEY)) {
-            mAdapter = new MySessionRecyclerViewAdapter(mainActivity.mEvents.get(eventIndex).getSubsetSessions(mIds), mListener);
-        } else if(!isSectioned){
-            mainActivity.mEvents.get(eventIndex).getSessions().clear();
-            GetAsyncData getSessionsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/sessions/", "agenda_id=" + mAgendaId};
-            getSessionsAsync.execute(params);
-            progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
-            mAdapter = new MySessionRecyclerViewAdapter(mainActivity.mEvents.get(eventIndex).getSessions(), mListener);
-        } else if(mainActivity.mEvents.get(eventIndex).needsUpdated(CACHE_KEY)) {
-            mainActivity.mEvents.get(eventIndex).getSessions().clear();
-            mainActivity.mEvents.get(eventIndex).updatePullTime(CACHE_KEY);
-            GetAsyncData getSessionsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/sessions/", "event_id=" + mainActivity.mEvents.get(eventIndex).getId()};
-            getSessionsAsync.execute(params);
-            progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
-            mAdapter = new MySessionSectionedRecylclerViewAdapter(data, mListener);
-        } else {
-            sectionSessions(mainActivity.mEvents.get(eventIndex).getSessions());
-            mAdapter = new MySessionSectionedRecylclerViewAdapter(data, mListener);
-        }
-
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -124,23 +127,28 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSessionListFragmentInteractionListener) {
-            mListener = (OnSessionListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnSessionListFragmentInteractionListener");
-        }
+        if(context instanceof EventInterface)
+            mEvents = (EventInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if(context instanceof OnErrorListener)
+            mErrorListener = (OnErrorListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnErrorListener");
+
+        if (context instanceof OnListFragmentInteractionListener)
+            mListener = (OnListFragmentInteractionListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onTaskComplete() {
-        throw new UnsupportedOperationException("Not implemented!");
+        mErrorListener = null;
+        mEvents = null;
     }
 
     @Override
@@ -148,20 +156,25 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         try {
             JSONObject result = new JSONObject(response);
             if (result.getBoolean("success")) {
+                mEvents.get(mEventId).getSessions().clear();
+                if(mAgendaId == null)
+                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
                 if(result.has("sessions")) {
                     JSONArray jSessions = result.getJSONArray("sessions");
                     for (int i = 0; i < jSessions.length(); i++) {
                         SSession session = new SSession();
                         session.fromJSON(jSessions.getJSONObject(i).toString());
-                        mainActivity.mEvents.get(mainActivity.mEventIndex).getSessions().add(session);
+                        mEvents.get(mEventId).getSessions().add(session);
                     }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mainActivity.mEvents.get(mainActivity.mEventIndex).getSessions());
-        if(isSectioned) sectionSessions(mainActivity.mEvents.get(mainActivity.mEventIndex).getSessions());
+        Collections.sort(mEvents.get(mEventId).getSessions());
+
+        if(isSectioned) sectionSessions(mEvents.get(mEventId).getSessions());
+
         mAdapter.notifyDataSetChanged();
         progress.dismiss();
     }
@@ -173,6 +186,12 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
         }
     }
 
+    /**
+     * Group {@link SSession}s by day of the week
+     * @param start start index
+     * @param sessions Sorted {@link List<SSession>}
+     * @return {@link SectionedSessionDataModel}
+     */
     private SectionedSessionDataModel groupSessionsByDay(int start, List<SSession> sessions){
         List<SSession> group = new ArrayList<>();
         String day = getDayFromDate(sessions.get(start).getStart());
@@ -192,7 +211,7 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
 
     @Override
     public void onTaskError(String error) {
-        mainActivity.handleError(error);
+        mErrorListener.handleError(error);
         progress.dismiss();
     }
 
@@ -206,15 +225,13 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnSessionListFragmentInteractionListener {
+    public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(SSession item);
     }
 
     public class SectionedSessionDataModel {
         private String day;
         private List<SSession> items;
-
-        public SectionedSessionDataModel(){}
 
         public SectionedSessionDataModel(String day, List<SSession> items){
             this.day = day;
@@ -223,10 +240,6 @@ public class SessionFragment extends Fragment implements OnTaskComplete{
 
         public String getDay() {
             return day;
-        }
-
-        public void setDay(String day) {
-            this.day = day;
         }
 
         public List<SSession> getItems() {

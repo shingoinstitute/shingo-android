@@ -16,8 +16,11 @@ import org.shingo.shingoapp.R;
  */
 public class HomeFragment extends Fragment {
 
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
     public HomeFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -34,6 +37,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("Shingo App");
+        ((MainActivity)getActivity()).toggleNavHeader(0);
     }
 
     @Override

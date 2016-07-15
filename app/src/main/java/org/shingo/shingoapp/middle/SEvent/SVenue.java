@@ -30,6 +30,7 @@ public class SVenue extends SObject implements Parcelable {
 
     public SVenue(){}
 
+    @SuppressWarnings("unused")
     public SVenue(String id, String name, double[] location, List<VenueMap> maps, List<SRoom> rooms){
         super(id, name);
         this.location = new Location(location[0], location[1]);
@@ -37,14 +38,17 @@ public class SVenue extends SObject implements Parcelable {
         this.rooms = rooms;
     }
 
+    @SuppressWarnings("unused")
     public Location getLocation(){
         return location;
     }
 
+    @SuppressWarnings("unused")
     public List<VenueMap> getMaps(){
         return maps;
     }
 
+    @SuppressWarnings("unused")
     public List<SRoom> getRooms(){
         return rooms;
     }
@@ -103,6 +107,7 @@ public class SVenue extends SObject implements Parcelable {
             return name;
         }
 
+        @SuppressWarnings("unused")
         public Bitmap getMap(){
             return map;
         }
@@ -127,10 +132,12 @@ public class SVenue extends SObject implements Parcelable {
             this.longitude = longitude;
         }
 
+        @SuppressWarnings("unused")
         public double getLatitude(){
             return latitude;
         }
 
+        @SuppressWarnings("unused")
         public double getLongitude(){
             return longitude;
         }
@@ -181,7 +188,7 @@ public class SVenue extends SObject implements Parcelable {
 
     protected SVenue(Parcel in) {
         this.location = in.readParcelable(Location.class.getClassLoader());
-        this.maps = new ArrayList<VenueMap>();
+        this.maps = new ArrayList<>();
         in.readList(this.maps, VenueMap.class.getClassLoader());
         this.rooms = in.createTypedArrayList(SRoom.CREATOR);
         this.is_loading = in.readByte() != 0;

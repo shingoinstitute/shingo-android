@@ -1,18 +1,13 @@
 package org.shingo.shingoapp.middle.SEntity;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.text.Html;
-import android.view.View;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SObject;
-import org.shingo.shingoapp.R;
 
 /**
  * This class holds the data
@@ -28,6 +23,7 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
 
     }
 
+    @SuppressWarnings("unused")
     public SRecipient(String id, String name, String author, String summary, Bitmap image,
                       SRecipientAward award){
         super(id, name, summary, image);
@@ -42,7 +38,7 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
             JSONObject jsonRecipient = new JSONObject(json);
 
             if(jsonRecipient.has("Award_Type__c"))
-                getTypeFromString(jsonRecipient.getString("Award_Type__c"));
+                setTypeFromString(jsonRecipient.getString("Award_Type__c"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -58,15 +54,7 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
     }
 
     @Override
-    public View getContent(Context context) {
-        View contentView = View.inflate(context, R.layout.srecipient_content_view, null);
-        ((TextView)contentView.findViewById(R.id.srecipient_name)).setText(name);
-        ((TextView)contentView.findViewById(R.id.srecipient_summary)).setText(Html.fromHtml(summary));
-        return contentView;
-    }
-
-    @Override
-    protected void getTypeFromString(String type) {
+    protected void setTypeFromString(String type) {
         this.award = SRecipientAward.valueOf(type.replace("\\s",""));
     }
 

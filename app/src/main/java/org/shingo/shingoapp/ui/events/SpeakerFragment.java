@@ -15,34 +15,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
-import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
-import org.shingo.shingoapp.middle.SEvent.SSession;
-import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.middle.SEvent.SEvent;
+import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
+import org.shingo.shingoapp.ui.events.viewadapters.MySpeakerRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.events.viewadapters.MySpeakerSectionedRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnSpeakerListFragmentInteractionListener}
- * interface.
+ * A fragment representing a list of {@link SPerson}s (Speakers).
  */
-public class SpeakerFragment extends Fragment implements OnTaskComplete {
+public class SpeakerFragment extends Fragment implements OnTaskCompleteListener {
 
-    private static final String ARG_ID = "ids";
+    private static final String ARG_SPEAKER_IDS = "speaker_ids";
+    private static final String ARG_EVENT_ID = "event_id";
+    private static final String ARG_SESSION_ID = "session_id";
     private static final String CACHE_KEY = "speakers";
+    private ArrayList<String> mSpeakerIds;
+    private String mEventId;
     private String mSessionId;
-    private ArrayList<String> mIds;
-    private OnSpeakerListFragmentInteractionListener mListener;
+    private boolean isSectioned = true;
+    private List<SectionedSpeakerDataModel> data = new ArrayList<>();
+
+    private OnErrorListener mErrorListener;
+    private EventInterface mEvents;
+
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
     private View view;
-    private MainActivity mainActivity;
-    private boolean isSectioned = true;
-    private List<SectionedSpeakerDataModel> data = new ArrayList<>();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,13 +56,20 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
     public SpeakerFragment() {
     }
 
-    public static SpeakerFragment newInstance(){ return new SpeakerFragment(); }
-
-    public static SpeakerFragment newInstance(ArrayList<String> ids, String session_id) {
+    public static SpeakerFragment newInstance(String eventId){
         SpeakerFragment fragment = new SpeakerFragment();
         Bundle args = new Bundle();
-        args.putString("session_id", session_id);
-        args.putStringArrayList(ARG_ID, ids);
+        args.putString(ARG_EVENT_ID, eventId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SpeakerFragment newInstance(ArrayList<String> ids, String sessionId, String eventId) {
+        SpeakerFragment fragment = new SpeakerFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_SESSION_ID, sessionId);
+        args.putString(ARG_EVENT_ID, eventId);
+        args.putStringArrayList(ARG_SPEAKER_IDS, ids);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,8 +79,11 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mIds = getArguments().getStringArrayList(ARG_ID);
-            mSessionId = getArguments().getString("session_id");
+            if(getArguments().containsKey(ARG_SPEAKER_IDS))
+                mSpeakerIds = getArguments().getStringArrayList(ARG_SPEAKER_IDS);
+            if(getArguments().containsKey(ARG_SESSION_ID))
+                mSessionId = getArguments().getString(ARG_SESSION_ID);
+            mEventId = getArguments().getString(ARG_EVENT_ID);
             isSectioned = false;
         }
     }
@@ -77,45 +92,31 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
-        mainActivity = (MainActivity)getActivity();
-        mainActivity.setTitle("Speakers");
-        int eventIndex = mainActivity.mEventIndex;
-        if(mainActivity.mEvents.size() == 0){
-            mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
-            return null;
+        getActivity().setTitle("Speakers");
+
+        SEvent event = mEvents.get(mEventId);
+        if(mSpeakerIds != null && event.hasCache(CACHE_KEY)){
+            mAdapter = new MySpeakerRecyclerViewAdapter(event.getSubsetSpeakers(mSpeakerIds));
+        } else if(event.needsUpdated(CACHE_KEY)){
+            GetAsyncData getSpeakersAsync = new GetAsyncData(this);
+            getSpeakersAsync.execute("/salesforce/events/speakers", mSessionId == null ? ARG_EVENT_ID + "=" +mEventId : ARG_SESSION_ID + "=" + mSessionId);
+            mAdapter = isSectioned ? new MySpeakerSectionedRecyclerViewAdapter(data) : new MySpeakerRecyclerViewAdapter(event.getSpeakers());
+
+            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
+        } else {
+            sectionSpeakers(event.getSpeakers());
+            mAdapter = new MySpeakerSectionedRecyclerViewAdapter(data);
         }
+
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        if(mIds != null && mainActivity.mEvents.get(eventIndex).hasCache(CACHE_KEY)){
-            mAdapter = new MySpeakerRecyclerViewAdapter(mainActivity.mEvents.get(eventIndex).getSubsetSpeakers(mIds), mListener);
-        } else if(mIds != null){
-            mainActivity.mEvents.get(eventIndex).getSpeakers().clear();
-            GetAsyncData getSpeakersAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/speakers", "session_id=" + mSessionId};
-            getSpeakersAsync.execute(params);
-            mAdapter = new MySpeakerRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getSpeakers(), mListener);
-            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
-        } else if(mainActivity.mEvents.get(eventIndex).needsUpdated(CACHE_KEY)){
-            mainActivity.mEvents.get(eventIndex).getSpeakers().clear();
-            mainActivity.mEvents.get(eventIndex).updatePullTime(CACHE_KEY);
-            GetAsyncData getSpeakersAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/speakers", "event_id=" + mainActivity.mEvents.get(eventIndex).getId()};
-            getSpeakersAsync.execute(params);
-            mAdapter = new MySpeakerSectionedRecyclerViewAdapter(data, mListener);
-            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
-        } else {
-            sectionSpeakers(mainActivity.mEvents.get(eventIndex).getSpeakers());
-            mAdapter = new MySpeakerSectionedRecyclerViewAdapter(data, mListener);
-        }
-
         recyclerView.setAdapter(mAdapter);
 
-        if(mAdapter.getItemCount() == 0){
+        if(mAdapter.getItemCount() == 0)
             (view.findViewById(R.id.empty_speakers)).setVisibility(View.VISIBLE);
-        } else {
+        else
             (view.findViewById(R.id.empty_speakers)).setVisibility(View.GONE);
-        }
 
         return view;
     }
@@ -124,23 +125,22 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSpeakerListFragmentInteractionListener) {
-            mListener = (OnSpeakerListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnSpeakerListFragmentInteractionListener");
-        }
+        if (context instanceof EventInterface)
+            mEvents = (EventInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if (context instanceof OnErrorListener)
+            mErrorListener = (OnErrorListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnErrorListener");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onTaskComplete() {
-
+        mErrorListener = null;
+        mEvents = null;
     }
 
     @Override
@@ -148,30 +148,37 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
+                mEvents.get(mEventId).getSpeakers().clear();
+                if(mSessionId == null)
+                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
                 JSONArray jSpeakers = result.getJSONArray("speakers");
                 for(int i = 0; i < jSpeakers.length(); i++){
                     SPerson speaker = new SPerson();
                     speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).getSpeakers().add(speaker);
+                    mEvents.get(mEventId).getSpeakers().add(speaker);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Collections.sort(mainActivity.mEvents.get(mainActivity.mEventIndex).getSpeakers());
+        Collections.sort(mEvents.get(mEventId).getSpeakers());
 
-        if(isSectioned){
-            sectionSpeakers(mainActivity.mEvents.get(mainActivity.mEventIndex).getSpeakers());
-        }
+        if(isSectioned)
+            sectionSpeakers(mEvents.get(mEventId).getSpeakers());
 
-        if(mAdapter.getItemCount() == 0){
+        if(mAdapter.getItemCount() == 0)
             (view.findViewById(R.id.empty_speakers)).setVisibility(View.VISIBLE);
-        } else {
+        else
             (view.findViewById(R.id.empty_speakers)).setVisibility(View.GONE);
-        }
 
         mAdapter.notifyDataSetChanged();
+        progress.dismiss();
+    }
+
+    @Override
+    public void onTaskError(String error) {
+        mErrorListener.handleError(error);
         progress.dismiss();
     }
 
@@ -193,31 +200,9 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
         return new SectionedSpeakerDataModel(type.toString(), group);
     }
 
-    @Override
-    public void onTaskError(String error) {
-        mainActivity.handleError(error);
-        progress.dismiss();
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnSpeakerListFragmentInteractionListener {
-        void onListFragmentInteraction(SPerson person);
-    }
-
     public class SectionedSpeakerDataModel{
         private String header;
         private List<SPerson> items;
-
-        public SectionedSpeakerDataModel(){}
 
         public SectionedSpeakerDataModel(String header, List<SPerson> items){
             this.header = header + "s";
@@ -226,10 +211,6 @@ public class SpeakerFragment extends Fragment implements OnTaskComplete {
 
         public String getHeader() {
             return header;
-        }
-
-        public void setHeader(String day) {
-            this.header = day;
         }
 
         public List<SPerson> getItems() {

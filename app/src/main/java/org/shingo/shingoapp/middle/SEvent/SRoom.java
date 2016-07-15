@@ -2,6 +2,7 @@ package org.shingo.shingoapp.middle.SEvent;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +20,7 @@ public class SRoom extends SObject implements Comparable<SObject>,Parcelable {
 
     public SRoom(){}
 
+    @SuppressWarnings("unused")
     public SRoom(String id, String name, double[] location, int floor) {
         super(id, name);
         this.location = location;
@@ -38,16 +40,18 @@ public class SRoom extends SObject implements Comparable<SObject>,Parcelable {
         }
     }
 
+    @SuppressWarnings("unused")
     public double[] getLocation(){
         return location;
     }
 
+    @SuppressWarnings("unused")
     public int getFloor(){
         return floor;
     }
 
     @Override
-    public int compareTo(SObject a){
+    public int compareTo(@NonNull SObject a){
         if(!(a instanceof SRoom))
             throw new ClassCastException(a.getName() + " is not a SRoom");
         int floorCompare = this.floor - ((SRoom) a).floor;

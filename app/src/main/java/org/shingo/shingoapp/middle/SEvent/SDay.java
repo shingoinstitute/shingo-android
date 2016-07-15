@@ -12,9 +12,7 @@ import org.shingo.shingoapp.middle.SObject;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class holds data fo
@@ -28,6 +26,7 @@ public class SDay extends SObject implements Comparable<SObject>,Parcelable {
 
     public SDay(){}
 
+    @SuppressWarnings("unused")
     public SDay(String id, String name, Date date, List<String> sessions){
         super(id, name);
         this.date = date;
@@ -50,7 +49,7 @@ public class SDay extends SObject implements Comparable<SObject>,Parcelable {
             if(jsonDay.has("Display_Name__c"))
                 this.name = jsonDay.isNull("Display_Name__c") ? "" : jsonDay.getString("Display_Name__c");
             if(jsonDay.has("Agenda_Date__c"))
-                this.date = formatDateString(jsonDay.getString("Agenda_Date__c"));
+                this.date = parseDateString(jsonDay.getString("Agenda_Date__c"));
             if(jsonDay.has("Shingo_Sessions__r") && !jsonDay.isNull("Shingo_Sessions__r")) {
                 JSONArray jSessions = jsonDay.getJSONObject("Shingo_Sessions__r").getJSONArray("records");
                 for (int i = 0; i < jSessions.length(); i++)

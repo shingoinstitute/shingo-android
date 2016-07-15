@@ -15,9 +15,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
-import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.ui.interfaces.NavigationInterface;
+import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
+import org.shingo.shingoapp.ui.events.viewadapters.MyAgendaRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 import java.util.Collections;
 
@@ -27,17 +31,19 @@ import java.util.Collections;
  * Activities containing this fragment MUST implement the {@link OnAgendaFragmentInteractionListener}
  * interface.
  */
-public class AgendaFragment extends Fragment implements OnTaskComplete {
+public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
 
     private static final String ARG_EVENT_ID = "event_id";
+    private static final String CACHE_KEY = "agenda";
     private String mEventId;
+
     private OnAgendaFragmentInteractionListener mListener;
+    private OnErrorListener mErrorListener;
+    private NavigationInterface mNavigate;
+    private EventInterface mEvents;
+
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
-
-    private MainActivity mainActivity;
-
-    private final String CACHE_KEY = "agenda";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -57,7 +63,6 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainActivity = (MainActivity) getActivity();
 
         if (getArguments() != null) {
             mEventId = getArguments().getString(ARG_EVENT_ID);
@@ -69,17 +74,14 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_agenda_list, container, false);
 
-        Context context = view.getContext();
-        RecyclerView mRecyclerView = (RecyclerView) view;
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setTitle("Agenda");
-        if(mainActivity.mEvents.size() == 0){
-            mainActivity.onNavigationItemSelected(mainActivity.navigationView.getMenu().findItem(R.id.nav_events));
+        if(mEvents.all().size() == 0){
+            mNavigate.navigateToId(R.id.nav_events);
             return null;
         }
-        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
-            mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
-            mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda().clear();
+
+        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)) {
             GetAsyncData getDaysAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/days", "event_id=" + mEventId};
             getDaysAsync.execute(params);
@@ -87,7 +89,12 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
             progress = ProgressDialog.show(getContext(), "", "Loading agenda...");
         }
 
-        mAdapter = new MyAgendaRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda(), mListener);
+        mAdapter = new MyAgendaRecyclerViewAdapter(mEvents.get(mEventId).getAgenda(), mListener);
+
+
+        Context context = view.getContext();
+        RecyclerView mRecyclerView = (RecyclerView) view;
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -97,23 +104,34 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnAgendaFragmentInteractionListener) {
+        if (context instanceof EventInterface)
+            mEvents = (EventInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if (context instanceof NavigationInterface)
+            mNavigate = (NavigationInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement NavigationInterface");
+
+        if (context instanceof OnErrorListener)
+            mErrorListener = (OnErrorListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnErrorListener");
+
+        if (context instanceof OnAgendaFragmentInteractionListener)
             mListener = (OnAgendaFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnAgendaFragmentInteractionListener");
-        }
+        else
+            throw new RuntimeException(context.toString() + " must implement OnAgendaFragmentInteractionListener");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onTaskComplete() {
-        throw new UnsupportedOperationException("This callback is not implemented...");
+        mErrorListener = null;
+        mEvents = null;
+        mNavigate = null;
     }
 
     @Override
@@ -121,24 +139,26 @@ public class AgendaFragment extends Fragment implements OnTaskComplete {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
+                mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                mEvents.get(mEventId).getAgenda().clear();
                 JSONArray jDays = result.getJSONArray("days");
                 for(int i = 0; i < jDays.length(); i++){
                     SDay day = new SDay();
                     day.fromJSON(jDays.getJSONObject(i).toString());
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda().add(day);
+                    mEvents.get(mEventId).getAgenda().add(day);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mainActivity.mEvents.get(mainActivity.mEventIndex).getAgenda());
+        Collections.sort(mEvents.get(mEventId).getAgenda());
         mAdapter.notifyDataSetChanged();
         progress.dismiss();
     }
 
     @Override
     public void onTaskError(String error) {
-        mainActivity.handleError(error);
+        mErrorListener.handleError(error);
         progress.dismiss();
     }
 

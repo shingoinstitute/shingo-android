@@ -16,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * This class holds data for
@@ -41,6 +40,7 @@ public class SSession extends SObject implements Comparable<SObject>,Parcelable 
         this.id = id;
     }
 
+    @SuppressWarnings("unused")
     public SSession(String id, String name, String summary, SRoom room, Date start, Date end,
                     List<String> speakers, SSessionType type){
         super(id, name);
@@ -65,9 +65,9 @@ public class SSession extends SObject implements Comparable<SObject>,Parcelable 
                 this.room.fromJSON(jsonSession.getJSONObject("Room__r").toString());
             }
             if(jsonSession.has("Start_Date_Time__c"))
-                this.start = formatDateTimeString(jsonSession.getString("Start_Date_Time__c"));
+                this.start = parseDateTimeString(jsonSession.getString("Start_Date_Time__c"));
             if(jsonSession.has("End_Date_Time__c"))
-                this.end = formatDateTimeString(jsonSession.getString("End_Date_Time__c"));
+                this.end = parseDateTimeString(jsonSession.getString("End_Date_Time__c"));
             if(jsonSession.has("Session_Speaker_Associations__r") && !jsonSession.isNull("Session_Speaker_Associations__r")){
                 JSONArray jSpeakers = jsonSession.getJSONObject("Session_Speaker_Associations__r").getJSONArray("records");
                 for(int i = 0; i < jSpeakers.length(); i++)
@@ -84,6 +84,7 @@ public class SSession extends SObject implements Comparable<SObject>,Parcelable 
         return summary;
     }
 
+    @SuppressWarnings("unused")
     public SRoom getRoom(){
         return room;
     }

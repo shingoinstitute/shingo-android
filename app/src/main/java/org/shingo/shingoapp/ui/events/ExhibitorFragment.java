@@ -15,25 +15,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
-import org.shingo.shingoapp.data.OnTaskComplete;
+import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
+import org.shingo.shingoapp.ui.events.viewadapters.MyExhibitorRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 /**
  * A fragment representing a list of {@link SOrganization}.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
  */
-public class ExhibitorFragment extends Fragment implements OnTaskComplete {
+public class ExhibitorFragment extends Fragment implements OnTaskCompleteListener {
 
     private static final String ARG_ID = "event_id";
     private static final String CACHE_KEY = "exhibitors";
     private String mEventId = "";
-    private OnListFragmentInteractionListener mListener;
-    private MainActivity mainActivity;
-    private ProgressDialog progress;
+
+    private OnErrorListener mErrorListener;
+    private EventInterface mEvents;
+
     private RecyclerView.Adapter mAdapter;
+    private ProgressDialog progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -64,47 +66,45 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_exhibitor_list, container, false);
 
-        Context context = view.getContext();
-        mainActivity = (MainActivity) getActivity();
+        MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setTitle("Exhibitors");
 
-        if(mainActivity.mEvents.get(mainActivity.mEventIndex).needsUpdated(CACHE_KEY)) {
+        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)) {
             GetAsyncData getExhibitorsAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/exhibitors", ARG_ID + "=" + mEventId};
             getExhibitorsAsync.execute(params);
             progress = ProgressDialog.show(getContext(), "", "Loading Exhibitors");
         }
 
-        mAdapter = new MyExhibitorRecyclerViewAdapter(mainActivity.mEvents.get(mainActivity.mEventIndex).getExhibitors(), mListener);
+        mAdapter = new MyExhibitorRecyclerViewAdapter(mEvents.get(mEventId).getExhibitors());
 
+        Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(mAdapter);
 
         return view;
     }
-
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
+        if(context instanceof EventInterface)
+            mEvents = (EventInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement EventInterface");
+
+        if(context instanceof OnErrorListener)
+            mErrorListener = (OnErrorListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnErrorListener");
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onTaskComplete() {
-        throw new UnsupportedOperationException("Not implemented..");
+        mErrorListener =null;
+        mEvents = null;
     }
 
     @Override
@@ -114,13 +114,13 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
             if(result.getBoolean("success")){
                 if(result.has("exhibitors")){
                     JSONArray jExhibitors = result.getJSONArray("exhibitors");
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).getExhibitors().clear();
-                    mainActivity.mEvents.get(mainActivity.mEventIndex).updatePullTime(CACHE_KEY);
+                    mEvents.get(mEventId).getExhibitors().clear();
+                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
                     for(int i = 0; i < jExhibitors.length(); i++){
                         SOrganization org = new SOrganization();
                         org.fromJSON(jExhibitors.getJSONObject(i).getJSONObject("Organization__r").toString());
                         org.type = SOrganization.SOrganizationType.Exhibitor;
-                        mainActivity.mEvents.get(mainActivity.mEventIndex).getExhibitors().add(org);
+                        mEvents.get(mEventId).getExhibitors().add(org);
                     }
                 }
             }
@@ -134,21 +134,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskComplete {
 
     @Override
     public void onTaskError(String error) {
-        mainActivity.handleError(error);
+        mErrorListener.handleError(error);
         progress.dismiss();
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(SOrganization org);
     }
 }

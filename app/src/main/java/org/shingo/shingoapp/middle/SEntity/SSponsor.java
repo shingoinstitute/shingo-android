@@ -1,16 +1,12 @@
 package org.shingo.shingoapp.middle.SEntity;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoapp.middle.SObject;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * This class holds the data for
@@ -28,32 +24,39 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
 
     public SSponsor(){}
 
+    @SuppressWarnings("unused")
     public SSponsor(String id, String name, String summary, String website, String email, String phone, Bitmap image, Bitmap banner, SSponsorLevel level) {
         super(id, name, summary, website, email, phone, image, SOrganizationType.Sponsor);
         this.banner = banner;
         this.level = level;
     }
 
+    @SuppressWarnings("unused")
     public Bitmap getBanner(){
         return banner;
     }
 
+    @SuppressWarnings("unused")
     public void setBanner(Bitmap banner) {
         this.banner = banner;
     }
 
+    @SuppressWarnings("unused")
     public Bitmap getSplash() {
         return splash;
     }
 
+    @SuppressWarnings("unused")
     public void setSplash(Bitmap splash) {
         this.splash = splash;
     }
 
+    @SuppressWarnings("unused")
     public String getSplashUrl() {
         return splashUrl;
     }
 
+    @SuppressWarnings("unused")
     public String getBannerUrl() {
         return bannerUrl;
     }
