@@ -21,7 +21,7 @@ public abstract class SEntity extends SObject {
     /**
      * Typically a logo, profile picture, or banner.
      */
-    protected Bitmap image;
+    private Bitmap image;
 
     /**
      * URL to download {@link #image}
@@ -33,7 +33,7 @@ public abstract class SEntity extends SObject {
      */
     protected String summary;
 
-    public SEntity(){}
+    SEntity(){}
 
     /**
      * Constructor to be used by child classes
@@ -42,7 +42,7 @@ public abstract class SEntity extends SObject {
      * @param summary A brief description
      * @param image A logo, profile picture, or banner
      */
-    public SEntity(String id, String name, String summary, Bitmap image){
+    SEntity(String id, String name, String summary, Bitmap image){
         super(id, name);
         this.summary = summary;
         this.image = image;

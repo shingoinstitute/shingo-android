@@ -37,7 +37,7 @@ public class SDay extends SObject implements Comparable<SObject>,Parcelable {
         return sessions;
     }
 
-    public Date getDate(){
+    private Date getDate(){
         return date;
     }
 
@@ -87,7 +87,7 @@ public class SDay extends SObject implements Comparable<SObject>,Parcelable {
         dest.writeString(this.name);
     }
 
-    protected SDay(Parcel in) {
+    private SDay(Parcel in) {
         this.sessions = in.createStringArrayList();
         long tmpDate = in.readLong();
         this.date = tmpDate == -1 ? null : new Date(tmpDate);

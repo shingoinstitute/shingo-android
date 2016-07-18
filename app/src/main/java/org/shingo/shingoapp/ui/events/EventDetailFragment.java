@@ -106,7 +106,7 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
 
 
 
-    public void setOnClickListeners(){
+    private void setOnClickListeners(){
         (view.findViewById(R.id.event_agenda)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,7 +146,7 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
     }
 
     @SuppressWarnings("deprecation")
-    public String formatEventDates(Date start, Date end){
+    private String formatEventDates(Date start, Date end){
         int deltaYear = start.getYear() - end.getYear();
         int deltaMonth = start.getMonth() - end.getMonth();
         int deltaDay = start.getDate() - end.getDate();

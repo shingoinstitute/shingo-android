@@ -180,6 +180,7 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
     }
 
     private void sectionSessions(List<SSession> sessions){
+        data.clear();
         for (int i = 0; i < sessions.size(); i++) {
             data.add(groupSessionsByDay(i, sessions));
             i += data.get(data.size() - 1).getItems().size() - 1;
@@ -249,5 +250,7 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
         public void setItems(List<SSession> items) {
             this.items = items;
         }
+
+        public void clear() { items.clear(); }
     }
 }

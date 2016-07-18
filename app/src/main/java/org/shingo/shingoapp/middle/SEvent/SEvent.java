@@ -144,7 +144,7 @@ public class SEvent extends SObject implements Comparable<SObject>,Parcelable {
         int start = speakers.size() - 1;
         int end = 0;
         for(String s : ids){
-            int i = speakers.indexOf(new SPerson(s));
+            int i = speakers.indexOf(new SPerson("{Id:\"" + s +"\"}"));
             start = i < start ? i : start;
             end = i > end ? i : end;
         }

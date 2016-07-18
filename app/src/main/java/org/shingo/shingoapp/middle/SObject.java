@@ -70,7 +70,7 @@ public abstract class SObject implements Comparable<SObject> {
      * @return {@link #id#equals(Object)}
      */
     @Override
-    public boolean equals(Object a) {
+    public boolean equals(@NonNull Object a) {
         return a instanceof SObject && this.id.equals(((SObject) a).getId());
 
     }
@@ -92,8 +92,12 @@ public abstract class SObject implements Comparable<SObject> {
     public void fromJSON(String json){
         try {
             JSONObject jsonObject = new JSONObject(json);
-            id = jsonObject.getString("Id");
-            name = jsonObject.getString("Name");
+            if(jsonObject.isNull("Id"))
+                throw new JSONException("Null 'Id' for SObject. All SObjects require an 'Id'.");
+            if(jsonObject.has("Id"))
+                this.id = jsonObject.getString("Id");
+            if(jsonObject.has("Name"))
+                this.name = jsonObject.getString("Name");
         } catch (JSONException e) {
             e.printStackTrace();
         }

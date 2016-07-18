@@ -5,7 +5,7 @@
     tools:context="org.shingo.shingoapp.ui.events.EventDetailFragment">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
@@ -44,7 +44,8 @@
                         android:id="@+id/event_map"
                         android:src="@drawable/ic_location_on"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/google_maps_cd" />
                 </LinearLayout>
 
                 <TextView
@@ -87,11 +88,13 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_view_agenda"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/view_agenda_cd" />
                     <TextView
                         android:text="Agenda"
                         android:gravity="center"
@@ -104,11 +107,13 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_event_seat"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/view_sessions_cd" />
                     <TextView
                         android:text="Sessions"
                         android:gravity="center"
@@ -121,11 +126,13 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_supervisor_account"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/view_speakers_cd" />
                     <TextView
                         android:text="Speakers"
                         android:gravity="center"
@@ -138,7 +145,8 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_local_offer"
                         android:layout_width="wrap_content"
@@ -155,7 +163,8 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_stars"
                         android:layout_width="wrap_content"
@@ -172,7 +181,8 @@
                     android:orientation="horizontal"
                     android:layout_margin="10dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:foreground="?android:attr/selectableItemBackground">
                     <ImageView
                         android:src="@drawable/ic_bookmark"
                         android:layout_width="wrap_content"

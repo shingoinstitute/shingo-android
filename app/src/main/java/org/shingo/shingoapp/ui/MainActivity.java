@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity
     private void replaceFragment(Fragment fragment){
         mFragment = fragment;
         if(getSupportFragmentManager().findFragmentByTag(fragment.getClass().getName()) != null)
-            getSupportFragmentManager().popBackStack(fragment.getClass().getName(),FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getSupportFragmentManager().popBackStackImmediate(fragment.getClass().getName(),FragmentManager.POP_BACK_STACK_INCLUSIVE);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_content, fragment, fragment.getClass().getName())
                 .addToBackStack(fragment.getClass().getName())
@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("deprecation")
     public void toggleNavHeader(int type){
         mToggle = type;
+        if(navigationView == null) return;
         View header = navigationView.getHeaderView(0);
         switch (type){
             case 0:

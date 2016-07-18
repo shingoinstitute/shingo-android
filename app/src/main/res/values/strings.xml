@@ -19,4 +19,8 @@
     <string name="lorem_ipsum_paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non semper diam, a sagittis mi. Donec lorem metus, consequat ac metus at, euismod porta massa. Nulla faucibus enim magna. Vestibulum vel vestibulum augue. Sed vestibulum et nibh a fringilla. Nam in lorem maximus, ullamcorper justo pretium, varius ligula. Duis ligula felis, malesuada a sollicitudin vitae, placerat eu enim. Cras quis eros in metus dignissim congue sit amet eu velit. Donec vehicula blandit dictum. Fusce vulputate dolor blandit dui consequat suscipit. Praesent consequat tortor eget libero tristique, eu suscipit augue laoreet. Aenean tristique nec risus id mattis.</string>
     <string name="name">Shingo Institute</string>
     <string name="web_addr">shingo.org</string>
+    <string name="google_maps_cd">Google Maps</string>
+    <string name="view_agenda_cd">View Agenda</string>
+    <string name="view_sessions_cd">View Sessions</string>
+    <string name="view_speakers_cd">View Speakers</string>
 </resources>

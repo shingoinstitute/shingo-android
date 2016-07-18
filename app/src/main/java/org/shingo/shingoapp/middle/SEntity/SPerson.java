@@ -87,7 +87,7 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
             if(jPerson.has("Organization__r"))
                 this.company = jPerson.isNull("Organization__r") ? "" : jPerson.getJSONObject("Organization__r").getString("Name");
             if(jPerson.has("Session_Speaker_Associations__r") && !jPerson.isNull("Session_Speaker_Associations__r")){
-                JSONArray array = jPerson.getJSONObject("Session_Speaker_Associations").getJSONArray("records");
+                JSONArray array = jPerson.getJSONObject("Session_Speaker_Associations__r").getJSONArray("records");
                 for(int i = 0; i < array.length(); i++){
                     JSONObject obj = array.getJSONObject(i);
                     if(obj.getJSONObject("Session__r").has("Session_Display_Name__c") && !obj.getJSONObject("Session__r").isNull("Session_Display_Name__c")) {

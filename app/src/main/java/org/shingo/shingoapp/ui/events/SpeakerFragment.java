@@ -84,7 +84,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
             if(getArguments().containsKey(ARG_SESSION_ID))
                 mSessionId = getArguments().getString(ARG_SESSION_ID);
             mEventId = getArguments().getString(ARG_EVENT_ID);
-            isSectioned = false;
+            isSectioned = mSessionId == null;
         }
     }
 
@@ -183,6 +183,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
     }
 
     private void sectionSpeakers(List<SPerson> speakers){
+        data.clear();
         for(SPerson.SPersonType type : SPerson.SPersonType.values()){
             data.add(groupSpeakersByType(type, speakers));
         }

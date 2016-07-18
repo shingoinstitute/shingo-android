@@ -1155,7 +1155,7 @@ public class TouchImageView extends ImageView {
         public void cancelFling() {
             if (scroller != null) {
                 setState(State.NONE);
-                scroller.forceFinished(true);
+                scroller.forceFinished();
             }
         }
 
@@ -1215,11 +1215,11 @@ public class TouchImageView extends ImageView {
             }
         }
 
-        public void forceFinished(boolean finished) {
+        public void forceFinished() {
             if (isPreGingerbread) {
-                scroller.forceFinished(finished);
+                scroller.forceFinished(true);
             } else {
-                overScroller.forceFinished(finished);
+                overScroller.forceFinished(true);
             }
         }
 

@@ -17,9 +17,12 @@ import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SSponsor;
+import org.shingo.shingoapp.ui.events.viewadapters.MySponsorSectionedRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
-import org.shingo.shingoapp.ui.events.viewadapters.MySponsorRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fragment representing a list of {@link SSponsor}s.
@@ -29,6 +32,7 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
     private static final String ARG_ID = "event_id";
     private static final String CACHE_KEY = "sponsors";
     private String mEventId = "";
+    private List<SectionedSponsorDataModel> data = new ArrayList<>();
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
@@ -76,8 +80,8 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
 
             progress = ProgressDialog.show(getContext(), "", "Loading Sponsors...");
         }
-
-        mAdapter = new MySponsorRecyclerViewAdapter(mEvents.get(mEventId).getSponsors());
+        sectionSponsors(mEvents.get(mEventId).getSponsors());
+        mAdapter = new MySponsorSectionedRecyclerViewAdapter(data);
         recyclerView.setAdapter(mAdapter);
 
         return view;
@@ -125,6 +129,8 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
             e.printStackTrace();
         }
 
+        sectionSponsors(mEvents.get(mEventId).getSponsors());
+
         mAdapter.notifyDataSetChanged();
 
         progress.dismiss();
@@ -134,5 +140,46 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
     public void onTaskError(String error) {
         mErrorListener.handleError(error);
         progress.dismiss();
+    }
+
+    private void sectionSponsors(List<SSponsor> sponsors){
+        data.clear();
+        for(SSponsor.SSponsorLevel type : SSponsor.SSponsorLevel.values()){
+            data.add(groupSponsorsByLevel(type, sponsors));
+        }
+    }
+
+    private SectionedSponsorDataModel groupSponsorsByLevel(SSponsor.SSponsorLevel level, List<SSponsor> sponsors){
+        List<SSponsor> group = new ArrayList<>();
+        for(SSponsor p : sponsors){
+            if(p.level == level)
+                group.add(p);
+            else if(level == SSponsor.SSponsorLevel.Friend && p.level == null)
+                group.add(p);
+        }
+
+        return new SectionedSponsorDataModel(level.toString(), group);
+    }
+
+    public class SectionedSponsorDataModel {
+        private String header;
+        private List<SSponsor> items;
+
+        public SectionedSponsorDataModel(String header, List<SSponsor> items){
+            this.header = header + "s";
+            this.items = items;
+        }
+
+        public String getHeader() {
+            return header;
+        }
+
+        public List<SSponsor> getItems() {
+            return items;
+        }
+
+        public void setItems(List<SSponsor> items) {
+            this.items = items;
+        }
     }
 }
