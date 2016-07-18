@@ -1,9 +1,0 @@
-org.shingo.shingoapp
-org.shingo.shingoapp.data
-org.shingo.shingoapp.middle
-org.shingo.shingoapp.middle.SEntity
-org.shingo.shingoapp.middle.SEvent
-org.shingo.shingoapp.ui
-org.shingo.shingoapp.ui.events
-org.shingo.shingoapp.ui.events.viewadapters
-org.shingo.shingoapp.ui.interfaces
