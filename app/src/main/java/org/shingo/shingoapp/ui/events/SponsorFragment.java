@@ -17,7 +17,8 @@ import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SSponsor;
-import org.shingo.shingoapp.ui.events.viewadapters.MySponsorSectionedRecyclerViewAdapter;
+import org.shingo.shingoapp.middle.SEntity.SectionedSEntityDataModel;
+import org.shingo.shingoapp.ui.events.viewadapters.MySectionedSEntityRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
@@ -32,7 +33,7 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
     private static final String ARG_ID = "event_id";
     private static final String CACHE_KEY = "sponsors";
     private String mEventId = "";
-    private List<SectionedSponsorDataModel> data = new ArrayList<>();
+    private List<SectionedSEntityDataModel> data = new ArrayList<>();
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
@@ -74,14 +75,14 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)){
+        if(mEvents.getEvent(mEventId).needsUpdated(CACHE_KEY)){
             GetAsyncData getSponsorsAsync = new GetAsyncData(this);
             getSponsorsAsync.execute("/salesforce/events/sponsors", ARG_ID + "=" + mEventId);
 
             progress = ProgressDialog.show(getContext(), "", "Loading Sponsors...");
         }
-        sectionSponsors(mEvents.get(mEventId).getSponsors());
-        mAdapter = new MySponsorSectionedRecyclerViewAdapter(data);
+        sectionSponsors(mEvents.getEvent(mEventId).getSponsors());
+        mAdapter = new MySectionedSEntityRecyclerViewAdapter(data);
         recyclerView.setAdapter(mAdapter);
 
         return view;
@@ -115,13 +116,13 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
                 if(result.has("sponsors")){
-                    mEvents.get(mEventId).getSponsors().clear();
-                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                    mEvents.getEvent(mEventId).getSponsors().clear();
+                    mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                     JSONArray jSponsors = result.getJSONArray("sponsors");
                     for(int i = 0; i < jSponsors.length(); i++){
                         SSponsor sponsor = new SSponsor();
                         sponsor.fromJSON(jSponsors.getJSONObject(i).toString());
-                        mEvents.get(mEventId).getSponsors().add(sponsor);
+                        mEvents.getEvent(mEventId).getSponsors().add(sponsor);
                     }
                 }
             }
@@ -129,9 +130,10 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
             e.printStackTrace();
         }
 
-        sectionSponsors(mEvents.get(mEventId).getSponsors());
+        sectionSponsors(mEvents.getEvent(mEventId).getSponsors());
 
         mAdapter.notifyDataSetChanged();
+        //TODO: Display empty message if data set is empty
 
         progress.dismiss();
     }
@@ -149,7 +151,7 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
         }
     }
 
-    private SectionedSponsorDataModel groupSponsorsByLevel(SSponsor.SSponsorLevel level, List<SSponsor> sponsors){
+    private SectionedSEntityDataModel groupSponsorsByLevel(SSponsor.SSponsorLevel level, List<SSponsor> sponsors){
         List<SSponsor> group = new ArrayList<>();
         for(SSponsor p : sponsors){
             if(p.level == level)
@@ -158,28 +160,6 @@ public class SponsorFragment extends Fragment implements OnTaskCompleteListener 
                 group.add(p);
         }
 
-        return new SectionedSponsorDataModel(level.toString(), group);
-    }
-
-    public class SectionedSponsorDataModel {
-        private String header;
-        private List<SSponsor> items;
-
-        public SectionedSponsorDataModel(String header, List<SSponsor> items){
-            this.header = header + "s";
-            this.items = items;
-        }
-
-        public String getHeader() {
-            return header;
-        }
-
-        public List<SSponsor> getItems() {
-            return items;
-        }
-
-        public void setItems(List<SSponsor> items) {
-            this.items = items;
-        }
+        return new SectionedSEntityDataModel(level.toString(), group);
     }
 }

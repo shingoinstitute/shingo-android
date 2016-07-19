@@ -819,7 +819,7 @@ public class TouchImageView extends ImageView {
     }
 
     /**
-     * Responsible for all touch events. Handles the heavy lifting of drag and also sends
+     * Responsible for events touch events. Handles the heavy lifting of drag and also sends
      * touch events to Scale Detector and Gesture Detector.
      * @author Ortiz
      *
@@ -1041,7 +1041,7 @@ public class TouchImageView extends ImageView {
         }
 
         /**
-         * Use interpolator to get t
+         * Use interpolator to getEvent t
          * @return
          */
         @SuppressWarnings("JavaDoc")
@@ -1053,7 +1053,7 @@ public class TouchImageView extends ImageView {
         }
 
         /**
-         * Interpolate the current targeted zoom and get the delta
+         * Interpolate the current targeted zoom and getEvent the delta
          * from the current zoom.
          * @param t
          * @return

@@ -100,7 +100,7 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
         View view = inflater.inflate(R.layout.fragment_session_list, container, false);
         getActivity().setTitle("Sessions");
 
-        SEvent event = mEvents.get(mEventId);
+        SEvent event = mEvents.getEvent(mEventId);
 
         if(!isSectioned && event.hasCache(CACHE_KEY)) {
             mAdapter = new MySessionRecyclerViewAdapter(event.getSubsetSessions(mSessionIds), mListener);
@@ -156,26 +156,27 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
         try {
             JSONObject result = new JSONObject(response);
             if (result.getBoolean("success")) {
-                mEvents.get(mEventId).getSessions().clear();
+                mEvents.getEvent(mEventId).getSessions().clear();
                 if(mAgendaId == null)
-                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                    mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                 if(result.has("sessions")) {
                     JSONArray jSessions = result.getJSONArray("sessions");
                     for (int i = 0; i < jSessions.length(); i++) {
                         SSession session = new SSession();
                         session.fromJSON(jSessions.getJSONObject(i).toString());
-                        mEvents.get(mEventId).getSessions().add(session);
+                        mEvents.getEvent(mEventId).getSessions().add(session);
                     }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mEvents.get(mEventId).getSessions());
+        Collections.sort(mEvents.getEvent(mEventId).getSessions());
 
-        if(isSectioned) sectionSessions(mEvents.get(mEventId).getSessions());
+        if(isSectioned) sectionSessions(mEvents.getEvent(mEventId).getSessions());
 
         mAdapter.notifyDataSetChanged();
+        //TODO: Display empty message if data set is empty
         progress.dismiss();
     }
 

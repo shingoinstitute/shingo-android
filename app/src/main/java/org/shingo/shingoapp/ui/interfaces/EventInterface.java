@@ -9,8 +9,8 @@ import java.util.List;
  */
 public interface EventInterface {
     void addEvent(SEvent event);
-    SEvent get(String id);
-    List<SEvent> all();
-    void clear();
-    void sort();
+    SEvent getEvent(String id);
+    List<SEvent> events();
+    void clearEvents();
+    void sortEvents();
 }

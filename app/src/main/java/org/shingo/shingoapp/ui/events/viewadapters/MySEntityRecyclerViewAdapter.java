@@ -13,51 +13,52 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.shingo.shingoapp.R;
-import org.shingo.shingoapp.middle.SEntity.SPerson;
+import org.shingo.shingoapp.middle.SEntity.SEntity;
 
 import java.io.InputStream;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link SPerson} (Speaker).
+ * Created by dustinehoman on 7/19/16.
  */
-public class MySpeakerRecyclerViewAdapter extends RecyclerView.Adapter<MySpeakerRecyclerViewAdapter.ViewHolder> {
+public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntityRecyclerViewAdapter.ViewHolder> {
 
-    private final List<SPerson> mValues;
+    private final List<? extends SEntity> mValues;
 
-    public MySpeakerRecyclerViewAdapter(List<SPerson> items) {
+    public MySEntityRecyclerViewAdapter(List<? extends SEntity> items) {
         mValues = items;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.sperson_content_view, parent, false);
+                .inflate(R.layout.sentity_view, parent, false);
         return new ViewHolder(view);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        (holder.mView.findViewById(R.id.expand_person)).setOnClickListener(new View.OnClickListener() {
+        holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
                 if(holder.mSummaryView.getVisibility() == View.VISIBLE)
-                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_less);
+                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_less);
                 else
-                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_more);
+                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_more);
             }
         });
         holder.mItem = mValues.get(position);
-        holder.mNameView.setText(mValues.get(position).getName());
-        holder.mDetailView.setText(mValues.get(position).getDetail());
-        holder.mSummaryView.setText(Html.fromHtml(mValues.get(position).getSummary()));
+        holder.mNameView.setText(holder.mItem.getName());
+        holder.mDetailView.setText(holder.mItem.getDetail());
+        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
 
-        if(mValues.get(position).getImage() == null) {
-            DownloadImageTask downloadImageTask = new DownloadImageTask(holder.mPictureView, mValues.get(position));
-            downloadImageTask.execute(mValues.get(position).getImageUrl());
+        if(holder.mItem.getImage() == null) {
+            DownloadImageTask downloadImageTask = new DownloadImageTask(holder.mPictureView, holder.mItem);
+            downloadImageTask.execute(holder.mItem.getImageUrl());
         } else {
-            holder.mPictureView.setImageBitmap(mValues.get(position).getImage());
+            holder.mPictureView.setImageBitmap(holder.mItem.getImage());
         }
     }
 
@@ -72,15 +73,15 @@ public class MySpeakerRecyclerViewAdapter extends RecyclerView.Adapter<MySpeaker
         public final TextView mNameView;
         public final TextView mDetailView;
         public final TextView mSummaryView;
-        public SPerson mItem;
+        public SEntity mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mPictureView = (ImageView) view.findViewById(R.id.person_picture);
-            mNameView = (TextView) view.findViewById(R.id.person_name);
-            mDetailView = (TextView) view.findViewById(R.id.person_detail);
-            mSummaryView = (TextView) view.findViewById(R.id.person_bio);
+            mPictureView = (ImageView) view.findViewById(R.id.entity_picture);
+            mNameView = (TextView) view.findViewById(R.id.entity_name);
+            mDetailView = (TextView) view.findViewById(R.id.entity_detail);
+            mSummaryView = (TextView) view.findViewById(R.id.entity_summary);
         }
 
         @Override
@@ -90,30 +91,30 @@ public class MySpeakerRecyclerViewAdapter extends RecyclerView.Adapter<MySpeaker
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-        SPerson person;
+        ImageView imageView;
+        SEntity entity;
 
-        public DownloadImageTask(ImageView bmImage, SPerson person) {
-            this.bmImage = bmImage;
-            this.person = person;
+        public DownloadImageTask(ImageView imageView, SEntity entity) {
+            this.imageView = imageView;
+            this.entity = entity;
         }
 
         protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
+            String url = urls[0];
+            Bitmap bitmap = null;
             try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
+                InputStream in = new java.net.URL(url).openStream();
+                bitmap = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-            return mIcon11;
+            return bitmap;
         }
 
         protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-            person.setImage(result);
+            imageView.setImageBitmap(result);
+            entity.setImage(result);
         }
     }
 }

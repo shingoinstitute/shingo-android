@@ -48,6 +48,10 @@
                     android:id="@+id/nav_model"
                     android:icon="@drawable/ic_content_copy"
                     android:title="Shingo Model" />
+                <item
+                    android:id="@+id/nav_affiliates"
+                    android:icon="@drawable/ic_school"
+                    android:title="Licensed Affiliates" />
             </menu>
         </item>
         <item android:title="Account">

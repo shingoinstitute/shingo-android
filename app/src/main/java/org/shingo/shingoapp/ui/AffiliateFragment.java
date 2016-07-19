@@ -1,4 +1,4 @@
-package org.shingo.shingoapp.ui.events;
+package org.shingo.shingoapp.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -16,25 +16,26 @@ import org.json.JSONObject;
 import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
-import org.shingo.shingoapp.middle.SEvent.SEvent;
-import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.middle.SEntity.SOrganization;
+import org.shingo.shingoapp.middle.SEntity.SOrganization.*;
+import org.shingo.shingoapp.ui.events.viewadapters.MySEntityRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.interfaces.AffiliateInterface;
 import org.shingo.shingoapp.ui.interfaces.CacheInterface;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
-import org.shingo.shingoapp.ui.events.viewadapters.MyEventRecyclerViewAdapter;
-import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnEventFragmentInteractionListener}
+ * A fragment representing a list of {@link SOrganization} of the type {@link SOrganizationType#Affiliate}.
+ * <p>
+ * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class EventFragment extends Fragment implements OnTaskCompleteListener {
+public class AffiliateFragment extends Fragment implements OnTaskCompleteListener {
 
-    private OnEventFragmentInteractionListener mListener;
+    private OnListFragmentInteractionListener mListener;
     private OnErrorListener mErrorListener;
-    private EventInterface mEvents;
     private CacheInterface mCache;
+    private AffiliateInterface mAffiliates;
+
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
 
@@ -42,11 +43,11 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public EventFragment() {
+    public AffiliateFragment() {
     }
 
-    public static EventFragment newInstance() {
-        return new EventFragment();
+    public static AffiliateFragment newInstance() {
+        return new AffiliateFragment();
     }
 
     @Override
@@ -57,57 +58,58 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        getActivity().setTitle("Upcoming Events");
+        getActivity().setTitle("Licensed Affiliates");
         ((MainActivity) getActivity()).toggleNavHeader(0);
 
-        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_affiliate_list, container, false);
 
-        if(mCache.needsUpdated(CacheInterface.CacheType.Events)) {
-            GetAsyncData getEventsAsync = new GetAsyncData(this);
-            getEventsAsync.execute("/salesforce/events");
+        if(mCache.needsUpdated(CacheInterface.CacheType.Affiliates)){
+            GetAsyncData getAffiliatesAsync = new GetAsyncData(this);
+            getAffiliatesAsync.execute("/salesforce/affiliates");
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Events", true);
+            progress = ProgressDialog.show(getContext(), "", "Loading Affiliates...");
         }
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        mAdapter = new MyEventRecyclerViewAdapter(mEvents.events(), mListener);
+        mAdapter = new MySEntityRecyclerViewAdapter(mAffiliates.affiliates());
         recyclerView.setAdapter(mAdapter);
 
         return view;
     }
 
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof CacheInterface)
+        if (context instanceof AffiliateInterface)
+            mAffiliates = (AffiliateInterface) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement AffiliateInterface");
+
+        if (context instanceof CacheInterface)
             mCache = (CacheInterface) context;
         else
             throw new RuntimeException(context.toString() + " must implement CacheInterface");
 
-        if(context instanceof EventInterface)
-            mEvents = (EventInterface) context;
-        else
-            throw new RuntimeException(context.toString() + " must implement EventInterface");
-
-        if(context instanceof OnErrorListener)
+        if (context instanceof OnErrorListener)
             mErrorListener = (OnErrorListener) context;
         else
             throw new RuntimeException(context.toString() + " must implement OnErrorListener");
 
-        if (context instanceof OnEventFragmentInteractionListener)
-            mListener = (OnEventFragmentInteractionListener) context;
+        if (context instanceof OnListFragmentInteractionListener)
+            mListener = (OnListFragmentInteractionListener) context;
         else
-            throw new RuntimeException(context.toString() + " must implement OnEventFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        mErrorListener =null;
-        mEvents = null;
+        mCache = null;
+        mAffiliates = null;
     }
 
     @Override
@@ -115,30 +117,29 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                JSONArray jEvents = result.getJSONArray("events");
-                mEvents.clearEvents();
-                mCache.updateTime(CacheInterface.CacheType.Events);
-                for(int i = 0; i < jEvents.length(); i++){
-                    SEvent event = new SEvent();
-                    event.fromJSON(jEvents.getJSONObject(i).toString());
-                    mEvents.addEvent(event);
+                if(result.has("affiliates")){
+                    JSONArray jAffiliates = result.getJSONArray("affiliates");
+                    mCache.updateTime(CacheInterface.CacheType.Affiliates);
+                    for(int i = 0; i < jAffiliates.length(); i++) {
+                        SOrganization org = new SOrganization(jAffiliates.getJSONObject(i).toString());
+                        org.type = SOrganizationType.Affiliate;
+                        mAffiliates.addAffiliate(org);
+                    }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        mEvents.sortEvents();
+        mAffiliates.sortAffiliates();
         mAdapter.notifyDataSetChanged();
-        //TODO: Display empty message if data set is empty
-
+        // TODO: Display empty message for empty data set
         progress.dismiss();
     }
 
     @Override
     public void onTaskError(String error) {
         mErrorListener.handleError(error);
-        progress.dismiss();
     }
 
     /**
@@ -146,12 +147,12 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnEventFragmentInteractionListener {
-        void onListFragmentInteraction(SEvent event);
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentInteraction(SOrganization affiliate);
     }
 }

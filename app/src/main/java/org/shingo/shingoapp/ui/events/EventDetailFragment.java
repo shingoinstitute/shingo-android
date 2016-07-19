@@ -82,7 +82,7 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
         view = inflater.inflate(R.layout.fragment_event_detail, container, false);
         MainActivity mainActivity = (MainActivity) getActivity();
 
-        mEvent = mEvents.get(mEventId);
+        mEvent = mEvents.getEvent(mEventId);
 
         if(mEvent == null){
             mNavigate.navigateToId(R.id.nav_events);
@@ -143,6 +143,8 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
                 mNavigate.navigateToId(R.id.nav_sponsors);
             }
         });
+        // TODO: Add venue views
+        // TODO: Add google maps activity and link
     }
 
     @SuppressWarnings("deprecation")

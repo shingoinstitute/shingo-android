@@ -76,12 +76,12 @@ public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
 
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setTitle("Agenda");
-        if(mEvents.all().size() == 0){
+        if(mEvents.events().size() == 0){
             mNavigate.navigateToId(R.id.nav_events);
             return null;
         }
 
-        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)) {
+        if(mEvents.getEvent(mEventId).needsUpdated(CACHE_KEY)) {
             GetAsyncData getDaysAsync = new GetAsyncData(this);
             String[] params = {"/salesforce/events/days", "event_id=" + mEventId};
             getDaysAsync.execute(params);
@@ -89,7 +89,7 @@ public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
             progress = ProgressDialog.show(getContext(), "", "Loading agenda...");
         }
 
-        mAdapter = new MyAgendaRecyclerViewAdapter(mEvents.get(mEventId).getAgenda(), mListener);
+        mAdapter = new MyAgendaRecyclerViewAdapter(mEvents.getEvent(mEventId).getAgenda(), mListener);
 
 
         Context context = view.getContext();
@@ -139,20 +139,21 @@ public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                mEvents.get(mEventId).updatePullTime(CACHE_KEY);
-                mEvents.get(mEventId).getAgenda().clear();
+                mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
+                mEvents.getEvent(mEventId).getAgenda().clear();
                 JSONArray jDays = result.getJSONArray("days");
                 for(int i = 0; i < jDays.length(); i++){
                     SDay day = new SDay();
                     day.fromJSON(jDays.getJSONObject(i).toString());
-                    mEvents.get(mEventId).getAgenda().add(day);
+                    mEvents.getEvent(mEventId).getAgenda().add(day);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(mEvents.get(mEventId).getAgenda());
+        Collections.sort(mEvents.getEvent(mEventId).getAgenda());
         mAdapter.notifyDataSetChanged();
+        // TODO: Display no agenda message if data set is empty
         progress.dismiss();
     }
 

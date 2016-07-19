@@ -3,5 +3,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal">
-    <include layout="@layout/sperson_content_view" />
+    <include layout="@layout/sentity_view" />
 </LinearLayout>

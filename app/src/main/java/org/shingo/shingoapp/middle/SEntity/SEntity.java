@@ -9,7 +9,7 @@ import org.shingo.shingoapp.middle.SObject;
 
 /**
  * This class is the data holder for
- * all entities in the Shingo app.
+ * events entities in the Shingo app.
  * Entities can be {@link SOrganization}s,
  * {@link SPerson}s, {@link SRecipient}s, or
  * {@link SSponsor}s.
@@ -104,7 +104,7 @@ public abstract class SEntity extends SObject {
     }
 
     /**
-     * Abstract method to get child classes detail
+     * Abstract method to getEvent child classes detail
      * @return {@link String}
      */
     public abstract String getDetail();

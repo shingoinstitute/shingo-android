@@ -2,7 +2,7 @@
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_view"
+    android:id="@+id/entity_card_view"
     android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -17,42 +17,45 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true">
         <LinearLayout
-            android:id="@+id/person_container"
+            android:id="@+id/entity_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:animateLayoutChanges="true">
             <ImageView
-                android:id="@+id/person_picture"
+                android:id="@+id/entity_picture"
                 android:layout_width="@dimen/profile_pic_width"
                 android:layout_height="@dimen/profile_pic_height"
-                android:layout_marginRight="5dp" />
+                android:layout_marginEnd="5dp"
+                android:contentDescription="@string/entity_image_cd" />
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:id="@+id/person_name"
+                    android:id="@+id/entity_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#000"
                     android:textSize="10pt"
                     android:textStyle="bold"/>
                 <TextView
-                    android:id="@+id/person_detail"
+                    android:id="@+id/entity_detail"
+                    android:autoLink="all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
             <ImageView
-                android:id="@+id/expand_person"
+                android:id="@+id/expand_entity_summary"
                 android:src="@drawable/ic_expand_more"
-                android:layout_gravity="bottom|right"
+                android:layout_gravity="bottom|end"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/expand_summary_cd" />
         </LinearLayout>
         <TextView
-            android:id="@+id/person_bio"
+            android:id="@+id/entity_summary"
             android:visibility="gone"
             android:padding="5dp"
             android:layout_width="wrap_content"

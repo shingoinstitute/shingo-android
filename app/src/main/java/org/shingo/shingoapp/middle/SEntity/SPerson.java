@@ -12,7 +12,7 @@ import org.shingo.shingoapp.middle.SObject;
 
 /**
  * This class is the data holder for
- * all people in the Shingo app.
+ * events people in the Shingo app.
  * People are defined as one of the following:
  * Speakers, Board Member's,
  * and Academy Members.

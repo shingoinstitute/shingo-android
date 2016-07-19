@@ -18,8 +18,8 @@ import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.ui.MainActivity;
+import org.shingo.shingoapp.ui.events.viewadapters.MySEntityRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
-import org.shingo.shingoapp.ui.events.viewadapters.MyExhibitorRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 /**
@@ -69,14 +69,14 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.setTitle("Exhibitors");
 
-        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)) {
+        if(mEvents.getEvent(mEventId).needsUpdated(CACHE_KEY)) {
             GetAsyncData getExhibitorsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/exhibitors", ARG_ID + "=" + mEventId};
-            getExhibitorsAsync.execute(params);
+            getExhibitorsAsync.execute("/salesforce/events/exhibitors", ARG_ID + "=" + mEventId);
+
             progress = ProgressDialog.show(getContext(), "", "Loading Exhibitors");
         }
 
-        mAdapter = new MyExhibitorRecyclerViewAdapter(mEvents.get(mEventId).getExhibitors());
+        mAdapter = new MySEntityRecyclerViewAdapter(mEvents.getEvent(mEventId).getExhibitors());
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
@@ -114,13 +114,13 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
             if(result.getBoolean("success")){
                 if(result.has("exhibitors")){
                     JSONArray jExhibitors = result.getJSONArray("exhibitors");
-                    mEvents.get(mEventId).getExhibitors().clear();
-                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                    mEvents.getEvent(mEventId).getExhibitors().clear();
+                    mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                     for(int i = 0; i < jExhibitors.length(); i++){
                         SOrganization org = new SOrganization();
                         org.fromJSON(jExhibitors.getJSONObject(i).getJSONObject("Organization__r").toString());
                         org.type = SOrganization.SOrganizationType.Exhibitor;
-                        mEvents.get(mEventId).getExhibitors().add(org);
+                        mEvents.getEvent(mEventId).getExhibitors().add(org);
                     }
                 }
             }
@@ -129,6 +129,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
         }
 
         mAdapter.notifyDataSetChanged();
+        //TODO: Display empty message if data set is empty
         progress.dismiss();
     }
 

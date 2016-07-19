@@ -23,4 +23,6 @@
     <string name="view_agenda_cd">View Agenda</string>
     <string name="view_sessions_cd">View Sessions</string>
     <string name="view_speakers_cd">View Speakers</string>
+    <string name="entity_image_cd">Entity Image (Logo or Profile Picture)</string>
+    <string name="expand_summary_cd">Expand Summary</string>
 </resources>

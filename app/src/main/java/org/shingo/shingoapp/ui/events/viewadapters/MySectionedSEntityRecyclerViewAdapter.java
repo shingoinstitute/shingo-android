@@ -15,20 +15,20 @@ import android.widget.TextView;
 import com.afollestad.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
 import org.shingo.shingoapp.R;
-import org.shingo.shingoapp.middle.SEntity.SRecipient;
-import org.shingo.shingoapp.ui.events.RecipientFragment;
+import org.shingo.shingoapp.middle.SEntity.SEntity;
+import org.shingo.shingoapp.middle.SEntity.SectionedSEntityDataModel;
 
 import java.io.InputStream;
 import java.util.List;
 
 /**
- * Created by dustinehoman on 7/18/16.
+ * Created by dustinehoman on 7/19/16.
  */
-public class MyRecipientSectionedRecyclerViewAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
+public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
 
-    private final List<RecipientFragment.SectionedRecipientDataModel> mData;
+    private final List<SectionedSEntityDataModel> mData;
 
-    public MyRecipientSectionedRecyclerViewAdapter(List<RecipientFragment.SectionedRecipientDataModel> data){
+    public MySectionedSEntityRecyclerViewAdapter(List<SectionedSEntityDataModel> data){
         mData = data;
     }
     @Override
@@ -48,19 +48,20 @@ public class MyRecipientSectionedRecyclerViewAdapter extends SectionedRecyclerVi
         sectionViewHolder.sectionTitle.setText(day);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder vh, int section, int relativePosition, int absolutePosition) {
-        List<SRecipient> items = mData.get(section).getItems();
+        List<? extends SEntity> items = mData.get(section).getItems();
 
         final ItemViewHolder holder = (ItemViewHolder) vh;
-        (holder.mView.findViewById(R.id.expand_person)).setOnClickListener(new View.OnClickListener() {
+        holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
                 if(holder.mSummaryView.getVisibility() == View.VISIBLE)
-                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_less);
+                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_less);
                 else
-                    ((ImageView)holder.mView.findViewById(R.id.expand_person)).setImageResource(R.drawable.ic_expand_more);
+                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_more);
             }
         });
         holder.mItem = items.get(relativePosition);
@@ -85,7 +86,7 @@ public class MyRecipientSectionedRecyclerViewAdapter extends SectionedRecyclerVi
                 return new SectionViewHolder(v);
             case SectionedRecyclerViewAdapter.VIEW_TYPE_ITEM:
                 v = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.sperson_content_view, parent, false);
+                        .inflate(R.layout.sentity_view, parent, false);
                 return new ItemViewHolder(v);
             default:
                 return new RecyclerView.ViewHolder(v) {
@@ -112,15 +113,15 @@ public class MyRecipientSectionedRecyclerViewAdapter extends SectionedRecyclerVi
         public final TextView mNameView;
         public final TextView mDetailView;
         public final TextView mSummaryView;
-        public SRecipient mItem;
+        public SEntity mItem;
 
         public ItemViewHolder(View view) {
             super(view);
             mView = view;
-            mPictureView = (ImageView) view.findViewById(R.id.person_picture);
-            mNameView = (TextView) view.findViewById(R.id.person_name);
-            mDetailView = (TextView) view.findViewById(R.id.person_detail);
-            mSummaryView = (TextView) view.findViewById(R.id.person_bio);
+            mPictureView = (ImageView) view.findViewById(R.id.entity_picture);
+            mNameView = (TextView) view.findViewById(R.id.entity_name);
+            mDetailView = (TextView) view.findViewById(R.id.entity_detail);
+            mSummaryView = (TextView) view.findViewById(R.id.entity_summary);
         }
 
         @Override
@@ -130,30 +131,30 @@ public class MyRecipientSectionedRecyclerViewAdapter extends SectionedRecyclerVi
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-        SRecipient recipient;
+        ImageView imageView;
+        SEntity entity;
 
-        public DownloadImageTask(ImageView bmImage, SRecipient recipient) {
-            this.bmImage = bmImage;
-            this.recipient = recipient;
+        public DownloadImageTask(ImageView bmImage, SEntity entity) {
+            this.imageView = bmImage;
+            this.entity = entity;
         }
 
         protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
+            String url = urls[0];
+            Bitmap bitmap = null;
             try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
+                InputStream in = new java.net.URL(url).openStream();
+                bitmap = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-            return mIcon11;
+            return bitmap;
         }
 
         protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-            recipient.setImage(result);
+            imageView.setImageBitmap(result);
+            entity.setImage(result);
         }
     }
 }

@@ -17,7 +17,8 @@ import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SRecipient;
-import org.shingo.shingoapp.ui.events.viewadapters.MyRecipientSectionedRecyclerViewAdapter;
+import org.shingo.shingoapp.middle.SEntity.SectionedSEntityDataModel;
+import org.shingo.shingoapp.ui.events.viewadapters.MySectionedSEntityRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
@@ -35,7 +36,7 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
     private static final String ARG_ID = "event_id";
     private static final String CACHE_KEY = "recipients";
     private String mEventId = "";
-    private List<SectionedRecipientDataModel> data = new ArrayList<>();
+    private List<SectionedSEntityDataModel> data = new ArrayList<>();
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
@@ -73,10 +74,9 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
         View view = inflater.inflate(R.layout.fragment_recipients_list, container, false);
         getActivity().setTitle("Recipients");
 
-        if(mEvents.get(mEventId).needsUpdated(CACHE_KEY)){
+        if(mEvents.getEvent(mEventId).needsUpdated(CACHE_KEY)){
             GetAsyncData getRecipientsAsync = new GetAsyncData(this);
-            String[] params = {"/salesforce/events/recipients", ARG_ID + "=" + mEventId};
-            getRecipientsAsync.execute(params);
+            getRecipientsAsync.execute("/salesforce/events/recipients", ARG_ID + "=" + mEventId);
 
             progress = ProgressDialog.show(getContext(), "", "Loading Recipients");
         }
@@ -85,8 +85,8 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
         RecyclerView recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        sectionRecipients(mEvents.get(mEventId).getRecipients());
-        mAdapter = new MyRecipientSectionedRecyclerViewAdapter(data);
+        sectionRecipients(mEvents.getEvent(mEventId).getRecipients());
+        mAdapter = new MySectionedSEntityRecyclerViewAdapter(data);
         recyclerView.setAdapter(mAdapter);
 
         return view;
@@ -121,12 +121,12 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
             if(result.getBoolean("success")){
                 if(result.has("recipients")){
                     JSONArray jRecipients = result.getJSONArray("recipients");
-                    mEvents.get(mEventId).getRecipients().clear();
-                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                    mEvents.getEvent(mEventId).getRecipients().clear();
+                    mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                     for(int i = 0; i < jRecipients.length(); i++){
                         SRecipient recipient = new SRecipient();
                         recipient.fromJSON(jRecipients.getJSONObject(i).toString());
-                        mEvents.get(mEventId).getRecipients().add(recipient);
+                        mEvents.getEvent(mEventId).getRecipients().add(recipient);
                     }
                 }
             }
@@ -134,9 +134,10 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
             e.printStackTrace();
         }
 
-        sectionRecipients(mEvents.get(mEventId).getRecipients());
+        sectionRecipients(mEvents.getEvent(mEventId).getRecipients());
 
         mAdapter.notifyDataSetChanged();
+        //TODO: Display empty message if data set is empty
         progress.dismiss();
     }
 
@@ -153,7 +154,7 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
         }
     }
 
-    private SectionedRecipientDataModel groupRecipientsByLevel(SRecipient.SRecipientAward award, List<SRecipient> sponsors){
+    private SectionedSEntityDataModel groupRecipientsByLevel(SRecipient.SRecipientAward award, List<SRecipient> sponsors){
         List<SRecipient> group = new ArrayList<>();
         for(SRecipient p : sponsors){
             if(p.award == award)
@@ -162,28 +163,6 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
                 group.add(p);
         }
 
-        return new SectionedRecipientDataModel(award.toString(), group);
-    }
-
-    public class SectionedRecipientDataModel {
-        private String header;
-        private List<SRecipient> items;
-
-        public SectionedRecipientDataModel(String header, List<SRecipient> items){
-            this.header = header + "s";
-            this.items = items;
-        }
-
-        public String getHeader() {
-            return header;
-        }
-
-        public List<SRecipient> getItems() {
-            return items;
-        }
-
-        public void setItems(List<SRecipient> items) {
-            this.items = items;
-        }
+        return new SectionedSEntityDataModel(award.toString(), group);
     }
 }

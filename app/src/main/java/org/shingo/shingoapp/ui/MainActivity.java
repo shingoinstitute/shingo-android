@@ -23,12 +23,15 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.shingo.shingoapp.R;
+import org.shingo.shingoapp.middle.SEntity.SOrganization;
 import org.shingo.shingoapp.middle.SEvent.SDay;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
 import org.shingo.shingoapp.middle.SEvent.SSession;
 import org.shingo.shingoapp.ui.events.AgendaFragment;
 import org.shingo.shingoapp.ui.events.EventDetailFragment;
 import org.shingo.shingoapp.ui.events.EventFragment;
+import org.shingo.shingoapp.ui.interfaces.AffiliateInterface;
+import org.shingo.shingoapp.ui.interfaces.CacheInterface;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
 import org.shingo.shingoapp.ui.events.ExhibitorFragment;
 import org.shingo.shingoapp.ui.events.RecipientFragment;
@@ -45,18 +48,23 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.shingo.shingoapp.ui.interfaces.CacheInterface.CacheType.*;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, EventFragment.OnEventFragmentInteractionListener,
         AgendaFragment.OnAgendaFragmentInteractionListener, SessionFragment.OnListFragmentInteractionListener,
-        NavigationInterface, EventInterface, OnErrorListener {
+        AffiliateFragment.OnListFragmentInteractionListener, NavigationInterface, EventInterface, OnErrorListener,
+        CacheInterface, AffiliateInterface {
 
     private static final long TIME_OUT = TimeUnit.MINUTES.toMillis(30);
-    private Date lastListPull;
+    private Date lastEventPull;
+    private Date lastAffiliatePull;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private Fragment mFragment;
     private int mToggle = 0;
     private ArrayList<SEvent> mEvents = new ArrayList<>();
+    private ArrayList<SOrganization> mAffiliates = new ArrayList<>();
     private SEvent mEvent;
 
     @SuppressWarnings("deprecation")
@@ -93,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         if(savedInstanceState != null){
             mEvents = savedInstanceState.getParcelableArrayList("mEvents");
             if(savedInstanceState.containsKey("update"))
-                lastListPull = new Date(savedInstanceState.getLong("lastListPull"));
+                lastEventPull = new Date(savedInstanceState.getLong("lastListPull"));
             mEvent = savedInstanceState.getParcelable("mEvent");
             mFragment = getSupportFragmentManager().getFragment(savedInstanceState, "mFragment");
             replaceFragment(mFragment);
@@ -106,14 +114,15 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState){
         outState.putParcelableArrayList("mEvents", mEvents);
         outState.putInt("toggle", mToggle);
-        if(lastListPull != null)
-            outState.putLong("lastListPull", lastListPull.getTime());
+        if(lastEventPull != null)
+            outState.putLong("lastListPull", lastEventPull.getTime());
         if(mEvent != null)
             outState.putParcelable("mEvent", mEvent);
 
         super.onSaveInstanceState(outState);
 
-        getSupportFragmentManager().putFragment(outState, "mFragment", mFragment);
+        if(getSupportFragmentManager().findFragmentById(mFragment.getId()) != null)
+            getSupportFragmentManager().putFragment(outState, "mFragment", mFragment);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -184,6 +193,9 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_events:
                 replaceFragment(EventFragment.newInstance());
+                break;
+            case R.id.nav_affiliates:
+                replaceFragment(AffiliateFragment.newInstance());
                 break;
             case R.id.nav_model:
                 replaceFragment(ModelFragment.newInstance());
@@ -266,14 +278,6 @@ public class MainActivity extends AppCompatActivity
         replaceFragment(SpeakerFragment.newInstance((ArrayList<String>) item.getSpeakers(), item.getId(), mEvent.getId()));
     }
 
-    public boolean needsUpdated() {
-        return lastListPull == null || lastListPull.after(new Date(lastListPull.getTime() + TIME_OUT));
-    }
-
-    public void updateListPull(){
-        lastListPull = new Date();
-    }
-
     @Override
     public void navigateToId(int id) {
         onNavigationItemSelected(navigationView.getMenu().findItem(id));
@@ -289,7 +293,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public SEvent get(String id) {
+    public void addAffiliate(SOrganization event) {
+        mAffiliates.add(event);
+    }
+
+    @Override
+    public SEvent getEvent(String id) {
         for(SEvent e : mEvents){
             if(e.getId().equals(id))
                 return e;
@@ -299,18 +308,72 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public List<SEvent> all() {
+    public SOrganization getAffiliate(String id){
+        for(SOrganization o : mAffiliates){
+            if(o.getId().equals(id))
+                return o;
+        }
+
+        throw new RuntimeException("Affiliate not found for id=" + id);
+    }
+
+    @Override
+    public List<SOrganization> affiliates() {
+        return mAffiliates;
+    }
+
+    @Override
+    public void clearAffiliates() {
+        mAffiliates.clear();
+    }
+
+    @Override
+    public void sortAffiliates() {
+        Collections.sort(mAffiliates);
+    }
+
+    @Override
+    public List<SEvent> events() {
         return mEvents;
     }
 
     @Override
-    public void clear() {
+    public void clearEvents() {
         mEvents.clear();
     }
 
     @Override
-    public void sort() {
+    public void sortEvents() {
         Collections.sort(mEvents);
+    }
+
+    @Override
+    public boolean needsUpdated(CacheType type) {
+        switch (type){
+            case Events:
+                return lastEventPull == null || lastEventPull.after(new Date(lastEventPull.getTime() + TIME_OUT));
+            case Affiliates:
+                return lastAffiliatePull == null || lastAffiliatePull.after(new Date(lastAffiliatePull.getTime() + TIME_OUT));
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public void updateTime(CacheType type) {
+        switch (type){
+            case Events:
+                lastEventPull = new Date();
+                break;
+            case Affiliates:
+                lastAffiliatePull = new Date();
+                break;
+        }
+    }
+
+    @Override
+    public void onListFragmentInteraction(SOrganization affiliate) {
+
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {

@@ -17,10 +17,11 @@ import org.shingo.shingoapp.R;
 import org.shingo.shingoapp.data.GetAsyncData;
 import org.shingo.shingoapp.data.OnTaskCompleteListener;
 import org.shingo.shingoapp.middle.SEntity.SPerson;
+import org.shingo.shingoapp.middle.SEntity.SectionedSEntityDataModel;
 import org.shingo.shingoapp.middle.SEvent.SEvent;
+import org.shingo.shingoapp.ui.events.viewadapters.MySEntityRecyclerViewAdapter;
+import org.shingo.shingoapp.ui.events.viewadapters.MySectionedSEntityRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.OnErrorListener;
-import org.shingo.shingoapp.ui.events.viewadapters.MySpeakerRecyclerViewAdapter;
-import org.shingo.shingoapp.ui.events.viewadapters.MySpeakerSectionedRecyclerViewAdapter;
 import org.shingo.shingoapp.ui.interfaces.EventInterface;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
     private String mEventId;
     private String mSessionId;
     private boolean isSectioned = true;
-    private List<SectionedSpeakerDataModel> data = new ArrayList<>();
+    private List<SectionedSEntityDataModel> data = new ArrayList<>();
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
@@ -91,21 +92,22 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
         getActivity().setTitle("Speakers");
 
-        SEvent event = mEvents.get(mEventId);
+        view = inflater.inflate(R.layout.fragment_speaker_list, container, false);
+
+        SEvent event = mEvents.getEvent(mEventId);
         if(mSpeakerIds != null && event.hasCache(CACHE_KEY)){
-            mAdapter = new MySpeakerRecyclerViewAdapter(event.getSubsetSpeakers(mSpeakerIds));
+            mAdapter = new MySEntityRecyclerViewAdapter(event.getSubsetSpeakers(mSpeakerIds));
         } else if(event.needsUpdated(CACHE_KEY)){
             GetAsyncData getSpeakersAsync = new GetAsyncData(this);
             getSpeakersAsync.execute("/salesforce/events/speakers", mSessionId == null ? ARG_EVENT_ID + "=" +mEventId : ARG_SESSION_ID + "=" + mSessionId);
-            mAdapter = isSectioned ? new MySpeakerSectionedRecyclerViewAdapter(data) : new MySpeakerRecyclerViewAdapter(event.getSpeakers());
+            mAdapter = isSectioned ? new MySectionedSEntityRecyclerViewAdapter(data) : new MySEntityRecyclerViewAdapter(event.getSpeakers());
 
             progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
         } else {
             sectionSpeakers(event.getSpeakers());
-            mAdapter = new MySpeakerSectionedRecyclerViewAdapter(data);
+            mAdapter = new MySectionedSEntityRecyclerViewAdapter(data);
         }
 
         Context context = view.getContext();
@@ -148,24 +150,24 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                mEvents.get(mEventId).getSpeakers().clear();
+                mEvents.getEvent(mEventId).getSpeakers().clear();
                 if(mSessionId == null)
-                    mEvents.get(mEventId).updatePullTime(CACHE_KEY);
+                    mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                 JSONArray jSpeakers = result.getJSONArray("speakers");
                 for(int i = 0; i < jSpeakers.length(); i++){
                     SPerson speaker = new SPerson();
                     speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
-                    mEvents.get(mEventId).getSpeakers().add(speaker);
+                    mEvents.getEvent(mEventId).getSpeakers().add(speaker);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Collections.sort(mEvents.get(mEventId).getSpeakers());
+        Collections.sort(mEvents.getEvent(mEventId).getSpeakers());
 
         if(isSectioned)
-            sectionSpeakers(mEvents.get(mEventId).getSpeakers());
+            sectionSpeakers(mEvents.getEvent(mEventId).getSpeakers());
 
         if(mAdapter.getItemCount() == 0)
             (view.findViewById(R.id.empty_speakers)).setVisibility(View.VISIBLE);
@@ -189,7 +191,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
         }
     }
 
-    private SectionedSpeakerDataModel groupSpeakersByType(SPerson.SPersonType type, List<SPerson> speakers){
+    private SectionedSEntityDataModel groupSpeakersByType(SPerson.SPersonType type, List<SPerson> speakers){
         List<SPerson> group = new ArrayList<>();
         for(SPerson p : speakers){
             if(p.type == type)
@@ -198,28 +200,6 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
                 group.add(p);
         }
 
-        return new SectionedSpeakerDataModel(type.toString(), group);
-    }
-
-    public class SectionedSpeakerDataModel{
-        private String header;
-        private List<SPerson> items;
-
-        public SectionedSpeakerDataModel(String header, List<SPerson> items){
-            this.header = header + "s";
-            this.items = items;
-        }
-
-        public String getHeader() {
-            return header;
-        }
-
-        public List<SPerson> getItems() {
-            return items;
-        }
-
-        public void setItems(List<SPerson> items) {
-            this.items = items;
-        }
+        return new SectionedSEntityDataModel(type.toString(), group);
     }
 }

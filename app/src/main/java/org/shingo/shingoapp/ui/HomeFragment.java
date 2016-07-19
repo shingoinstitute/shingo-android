@@ -40,13 +40,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().setTitle("Shingo App");
-        ((MainActivity)getActivity()).toggleNavHeader(0);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        getActivity().setTitle("Shingo App");
+        ((MainActivity)getActivity()).toggleNavHeader(0);
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         view.findViewById(R.id.events).setOnClickListener(new View.OnClickListener() {
@@ -59,6 +60,12 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 mNavigate.navigateToId(R.id.nav_model);
+            }
+        });
+        view.findViewById(R.id.affiliates).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mNavigate.navigateToId(R.id.nav_affiliates);
             }
         });
 

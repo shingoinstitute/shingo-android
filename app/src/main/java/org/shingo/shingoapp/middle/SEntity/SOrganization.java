@@ -10,7 +10,7 @@ import org.shingo.shingoapp.middle.SObject;
 
 /**
  * This class is the data holder for
- * all organizations in the Shingo app.
+ * events organizations in the Shingo app.
  * Organizations are defined as one of the following:
  * Affiliate, Exhibitor, Sponsor, or Recipient
  *
@@ -32,6 +32,12 @@ public class SOrganization extends SEntity implements Comparable<SObject>, Parce
      * Organization's public contact phone number
      */
     protected String phone;
+
+    /**
+     * The path to the organizations page on the
+     * Shingo website if it exists.
+     */
+    protected String shingoPath;
 
     /**
      * See {@link SOrganizationType}
@@ -75,10 +81,17 @@ public class SOrganization extends SEntity implements Comparable<SObject>, Parce
     public void fromJSON(String json) {
         super.fromJSON(json);
         try {
-            JSONObject jOrganization = new JSONObject(json);
-            this.website = (jOrganization.getString("Website").equals("null") ? null : jOrganization.getString("Website"));
-            this.email = (jOrganization.getString("Email").equals("null") ? null : jOrganization.getString("Email"));
-            this.phone = (jOrganization.getString("Phone").equals("null") ? null : jOrganization.getString("Phone"));
+            JSONObject jsonOrganization = new JSONObject(json);
+            if(jsonOrganization.has("Website"))
+                this.website = jsonOrganization.isNull("Website") ? "" : jsonOrganization.getString("Website");
+            if(jsonOrganization.has("Email"))
+                this.email = jsonOrganization.isNull("Email") ? "" : jsonOrganization.getString("Email");
+            if(jsonOrganization.has("Phone"))
+                this.phone = jsonOrganization.isNull("Phone") ? "" : jsonOrganization.getString("Phone");
+            if(jsonOrganization.has("Type__c"))
+                this.type = jsonOrganization.isNull("Type__c") ? SOrganizationType.None : SOrganizationType.valueOf(jsonOrganization.getString("Type__c").replace("\\s",""));
+            if(jsonOrganization.has("Page_Path__c"))
+                this.shingoPath = jsonOrganization.isNull("Page_Path__c") ? "" : jsonOrganization.getString("Page_Path__c");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -90,7 +103,18 @@ public class SOrganization extends SEntity implements Comparable<SObject>, Parce
      */
     @Override
     public String getDetail() {
-        return this.website;
+        if(type == null) return this.website;
+
+        switch (type){
+            case Affiliate:
+                return "http://shingo.org" + this.shingoPath;
+            case Exhibitor:
+            case Sponsor:
+                return this.email;
+            case None:
+            default:
+                return this.website;
+        }
     }
 
     /**

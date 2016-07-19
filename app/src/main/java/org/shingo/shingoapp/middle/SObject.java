@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * This is the base class for all Shingo SF Objects.
+ * This is the base class for events Shingo SF Objects.
  *
  * @author Dustin Homan
  */
