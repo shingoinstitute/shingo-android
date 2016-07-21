@@ -25,4 +25,7 @@
     <string name="view_speakers_cd">View Speakers</string>
     <string name="entity_image_cd">Entity Image (Logo or Profile Picture)</string>
     <string name="expand_summary_cd">Expand Summary</string>
+    <string name="refresh">refresh</string>
+    <string name="empty_object">No content yet! Come back soon!</string>
+    <string name="com.appsee.apikey" translatable="false">2e7e191f3ffc46af90264416cf2de76e</string>
 </resources>
