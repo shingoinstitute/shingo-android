@@ -139,6 +139,8 @@ public class VenueFragment extends Fragment implements OnTaskCompleteListener {
         Collections.sort(mEvents.getEvent(mEventId).getVenues());
         mAdapter.notifyDataSetChanged();
         progress.dismiss();
+        if(mEvents.getEvent(mEventId).getVenues().size() == 1)
+            mListener.onListFragmentInteraction(mEvents.getEvent(mEventId).getVenues().get(0));
     }
 
     @Override

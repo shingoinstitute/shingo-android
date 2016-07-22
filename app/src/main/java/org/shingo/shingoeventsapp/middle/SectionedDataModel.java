@@ -10,7 +10,7 @@ public class SectionedDataModel {
     private List<? extends SObject> items;
 
     public SectionedDataModel(String header, List<? extends SObject> items){
-        this.header = header + "s";
+        this.header = header;
         this.items = items;
     }
 

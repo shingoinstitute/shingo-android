@@ -28,4 +28,6 @@
     <string name="refresh">refresh</string>
     <string name="empty_object">No content yet! Come back soon!</string>
     <string name="com.appsee.apikey" translatable="false">2e7e191f3ffc46af90264416cf2de76e</string>
+    <string name="venue_maps_cd">Venue Maps</string>
+    <string name="rooms">Rooms</string>
 </resources>

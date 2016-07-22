@@ -51,7 +51,7 @@
 
                 <TextView
                     android:id="@+id/event_sales_text"
-                    android:layout_marginStart="5dp"
+                    android:layout_margin="5dp"
                     android:layout_marginEnd="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -72,135 +72,69 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-                <LinearLayout
+                <TextView
                     android:id="@+id/event_agenda"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
+                    android:drawableStart="@drawable/ic_view_agenda"
+                    android:drawablePadding="5dp"
+                    android:text="Agenda"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_view_agenda"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/view_agenda_cd" />
-                    <TextView
-                        android:text="Agenda"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_sessions"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
+                    android:drawableStart="@drawable/ic_event_seat"
+                    android:drawablePadding="5dp"
+                    android:text="Sessions"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_event_seat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/view_sessions_cd" />
-                    <TextView
-                        android:text="Sessions"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_speakers"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_supervisor_account"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/view_speakers_cd" />
-                    <TextView
-                        android:text="Speakers"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:drawableStart="@drawable/ic_supervisor_account"
+                    android:drawablePadding="5dp"
+                    android:text="Speakers"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_exhibitors"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_local_offer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:text="Exhibitors"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:drawableStart="@drawable/ic_local_offer"
+                    android:drawablePadding="5dp"
+                    android:text="Exhibitors"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_recipients"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_stars"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:text="Recipients"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:drawableStart="@drawable/ic_stars"
+                    android:drawablePadding="5dp"
+                    android:text="Recipients"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_sponsors"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_bookmark"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:text="Sponsors"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
-                <LinearLayout
+                    android:drawableStart="@drawable/ic_bookmark"
+                    android:drawablePadding="5dp"
+                    android:text="Sponsors"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
                     android:id="@+id/event_venues"
-                    android:orientation="horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground">
-                    <ImageView
-                        android:src="@drawable/ic_business"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:text="Venues"
-                        android:gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
+                    android:drawableStart="@drawable/ic_business"
+                    android:drawablePadding="5dp"
+                    android:text="Venues"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
             </GridLayout>
         </android.support.v7.widget.CardView>
 

@@ -46,7 +46,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
         String day = mData.get(section).getHeader();
         SectionViewHolder sectionViewHolder = (SectionViewHolder) holder;
-        sectionViewHolder.sectionTitle.setText(day);
+        sectionViewHolder.sectionTitle.setText(day + "s");
     }
 
     @SuppressWarnings("deprecation")

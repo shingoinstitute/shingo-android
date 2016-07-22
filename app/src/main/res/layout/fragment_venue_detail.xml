@@ -1,13 +1,69 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.shingo.shingoeventsapp.ui.events.VenueDetailFragment">
+    android:layout_height="wrap_content"
+    tools:context="org.shingo.shingoeventsapp.ui.events.EventDetailFragment"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        card_view:contentPadding="5dp"
+        card_view:cardCornerRadius="4dp"
+        card_view:cardElevation="1dp">
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/venue_name"
+                android:textSize="12pt"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryDark"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="@dimen/text_margin"
+                android:layout_height="wrap_content" />
 
-</FrameLayout>
+            <TextView
+                android:drawableEnd="@drawable/ic_location_on"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:id="@+id/venue_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/venue_maps"
+                android:drawableStart="@drawable/ic_map"
+                android:drawablePadding="5dp"
+                android:text="Floor Maps"
+                android:gravity="center"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+    <TextView
+        android:text="@string/rooms"
+        android:textSize="12pt"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryDark"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/text_margin"
+        android:layout_height="wrap_content" />
+    <View style="@style/Divider" android:layout_margin="10dp" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/room_list"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

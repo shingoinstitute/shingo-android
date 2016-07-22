@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity
@@ -125,6 +126,8 @@ public class MainActivity extends AppCompatActivity
         assert drawer != null;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if(Objects.equals(mFragment.getClass().getName(), HomeFragment.class.getName())){
+            this.finishAffinity();
         } else {
             super.onBackPressed();
         }
@@ -276,6 +279,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void navigateToId(int id) {
         onNavigationItemSelected(navigationView.getMenu().findItem(id));
+    }
+
+    @Override
+    public void changeFragment(Fragment fragment){
+        replaceFragment(fragment);
     }
 
     @Override

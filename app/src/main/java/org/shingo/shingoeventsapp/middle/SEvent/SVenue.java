@@ -65,12 +65,14 @@ public class SVenue extends SEventObject implements Parcelable {
                 this.location = new Location(jsonVenue.getJSONObject("Venue_Location__c").getDouble("Latitude"), jsonVenue.getJSONObject("Venue_Location__c").getDouble("Longitude"));
             if(jsonVenue.has("Maps__c")) {
                 String[] maps = jsonVenue.isNull("Maps__c") ? new String[0] : jsonVenue.getString("Maps__c").split("\r\n");
+                this.maps.clear();
                 for(String m : maps){
                     this.maps.add(new VenueMap(m));
                 }
             }
             if(jsonVenue.has("Shingo_Rooms__r") && !jsonVenue.isNull("Shingo_Rooms__r")){
                 JSONArray jRooms = jsonVenue.getJSONObject("Shingo_Rooms__r").getJSONArray("records");
+                rooms.clear();
                 for(int i = 0; i < jRooms.length(); i++){
                     SRoom room = new SRoom();
                     room.fromJSON(jRooms.getJSONObject(i).toString());
