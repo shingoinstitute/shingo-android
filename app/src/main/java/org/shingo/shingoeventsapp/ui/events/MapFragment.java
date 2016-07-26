@@ -4,6 +4,9 @@ package org.shingo.shingoeventsapp.ui.events;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -88,6 +91,7 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        getActivity().setTitle("Venue Map");
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         progress = (ProgressBar) view.findViewById(R.id.map_progress);
@@ -96,7 +100,16 @@ public class MapFragment extends Fragment {
             downloadImageTask.execute(mUrl);
         } else {
             progress.setVisibility(View.GONE);
-            ((TouchImageView)view.findViewById(R.id.map)).setImageBitmap(map);
+            TouchImageView touchImageView = (TouchImageView) view.findViewById(R.id.map);
+            if(mPin != null){
+                Bitmap copy = map.copy(Bitmap.Config.ARGB_8888, true);
+                Canvas canvas = new Canvas(copy);
+                canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on), (float)mPin[0], (float)mPin[1], null);
+                touchImageView.setImageBitmap(copy);
+            } else {
+                touchImageView.setImageBitmap(map);
+            }
+            touchImageView.resetZoom();
         }
 
         return view;
@@ -104,9 +117,11 @@ public class MapFragment extends Fragment {
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         TouchImageView view;
+        Bitmap marker;
 
         public DownloadImageTask(TouchImageView view) {
             this.view = view;
+            marker = BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on);
         }
 
         protected Bitmap doInBackground(String... urls) {
@@ -123,7 +138,15 @@ public class MapFragment extends Fragment {
         }
 
         protected void onPostExecute(Bitmap result) {
-            view.setImageBitmap(result);
+            if(mPin != null){
+                Bitmap copy = result.copy(Bitmap.Config.ARGB_8888, true);
+                Canvas canvas = new Canvas(copy);
+                canvas.drawBitmap(marker, (float)mPin[0] - marker.getHeight() / 2, (float)mPin[1] - marker.getWidth() / 2, null);
+                view.setImageBitmap(copy);
+            } else {
+                view.setImageDrawable(new BitmapDrawable(getResources(), result));
+            }
+            view.resetZoom();
             progress.setVisibility(View.GONE);
             map = result;
         }

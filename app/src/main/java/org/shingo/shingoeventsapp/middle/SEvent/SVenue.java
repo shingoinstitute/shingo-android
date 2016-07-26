@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -63,12 +64,18 @@ public class SVenue extends SEventObject implements Parcelable {
             JSONObject jsonVenue = new JSONObject(json);
             if(jsonVenue.has("Venue_Location__c") && !jsonVenue.isNull("Venue_Location__c"))
                 this.location = new Location(jsonVenue.getJSONObject("Venue_Location__c").getDouble("Latitude"), jsonVenue.getJSONObject("Venue_Location__c").getDouble("Longitude"));
-            if(jsonVenue.has("Maps__c")) {
-                String[] maps = jsonVenue.isNull("Maps__c") ? new String[0] : jsonVenue.getString("Maps__c").split("\r\n");
-                this.maps.clear();
-                for(String m : maps){
-                    this.maps.add(new VenueMap(m));
+            if(jsonVenue.has("Maps__r") && !jsonVenue.isNull("Maps__r")) {
+                JSONArray jsonMapsArray = jsonVenue.getJSONObject("Maps__r").getJSONArray("records");
+                for(int i = 0; i < jsonMapsArray.length(); i++){
+                    JSONObject jsonMap = jsonMapsArray.getJSONObject(i);
+                    VenueMap map = new VenueMap();
+                    map.setName(jsonMap.isNull("Name") ? "Map: " + i : jsonMap.getString("Name"));
+                    map.setFloor(jsonMap.isNull("Floor__c") ? 0 : jsonMap.getInt("Floor__c"));
+                    map.setUrl(jsonMap.isNull("URL__c") ? "https://placehold.it/1280x1280" : jsonMap.getString("URL__c"));
+                    this.maps.add(map);
                 }
+
+                Collections.sort(maps);
             }
             if(jsonVenue.has("Shingo_Rooms__r") && !jsonVenue.isNull("Shingo_Rooms__r")){
                 JSONArray jRooms = jsonVenue.getJSONObject("Shingo_Rooms__r").getJSONArray("records");
@@ -76,6 +83,7 @@ public class SVenue extends SEventObject implements Parcelable {
                 for(int i = 0; i < jRooms.length(); i++){
                     SRoom room = new SRoom();
                     room.fromJSON(jRooms.getJSONObject(i).toString());
+                    room.setVenueId(this.id);
                     rooms.add(room);
                 }
             }
@@ -94,16 +102,35 @@ public class SVenue extends SEventObject implements Parcelable {
         private String name;
         private Bitmap map;
         private String url;
-        public int order = 0;
+        private int floor = 0;
+
+        public VenueMap(){}
 
         public VenueMap(String url){
+            this.name = url;
             this.url = url;
         }
 
-        public VenueMap(String name, Bitmap map, int order){
+        public VenueMap(String name, Bitmap map, int floor){
             this.name = name;
             this.map = map;
-            this.order = order;
+            this.floor = floor;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setFloor(int floor) {
+            this.floor = floor;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public int getFloor() {
+            return floor;
         }
 
         public String getName(){
@@ -123,7 +150,7 @@ public class SVenue extends SEventObject implements Parcelable {
 
         @Override
         public int compareTo(@NonNull VenueMap a) {
-            int compare = this.order - a.order;
+            int compare = this.floor - a.floor;
             if(compare == 0){
                 return this.name.compareTo(a.getName());
             }
@@ -141,14 +168,14 @@ public class SVenue extends SEventObject implements Parcelable {
             dest.writeString(this.name);
             dest.writeParcelable(this.map, flags);
             dest.writeString(this.url);
-            dest.writeInt(this.order);
+            dest.writeInt(this.floor);
         }
 
         protected VenueMap(Parcel in) {
             this.name = in.readString();
             this.map = in.readParcelable(Bitmap.class.getClassLoader());
             this.url = in.readString();
-            this.order = in.readInt();
+            this.floor = in.readInt();
         }
 
         public static final Creator<VenueMap> CREATOR = new Creator<VenueMap>() {

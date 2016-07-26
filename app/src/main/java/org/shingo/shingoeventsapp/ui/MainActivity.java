@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
-        Appsee.start(getString(R.string.com_appsee_apikey));
+//        Appsee.start(getString(R.string.com_appsee_apikey));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -387,6 +387,18 @@ public class MainActivity extends AppCompatActivity
         } else if(item instanceof SSession){
             SSession session = (SSession) item;
             replaceFragment(SpeakerFragment.newInstance((ArrayList<String>) session.getSpeakers(), session.getId(), mEvent.getId()));
+        } else if(item instanceof SRoom){
+            SRoom room = (SRoom) item;
+            int i = mEvent.getVenues().indexOf(new SVenue("{Id:\"" + room.getVenueId() + "\"}"));
+            String url = "";
+            for(SVenue.VenueMap map : mEvent.getVenues().get(i).getMaps()){
+                if(map.getFloor() == room.getFloor()){
+                    url = map.getUrl();
+                    break;
+                }
+            }
+            if(url.isEmpty()) return;
+            replaceFragment(MapFragment.newInstance(url, room.getLocation()));
         }
     }
 

@@ -17,12 +17,21 @@ import org.shingo.shingoeventsapp.middle.SObject;
 public class SRoom extends SEventObject implements Comparable<SObject>,Parcelable {
     private double[] location = new double[2];
     private int floor;
+    private String venueId;
 
     public SRoom(){}
 
     @Override
     public String getDetail() {
         return "Floor: " + String.valueOf(floor);
+    }
+
+    public String getVenueId() {
+        return venueId;
+    }
+
+    public void setVenueId(String venueId) {
+        this.venueId = venueId;
     }
 
     @SuppressWarnings("unused")
@@ -37,8 +46,14 @@ public class SRoom extends SEventObject implements Comparable<SObject>,Parcelabl
         super.fromJSON(json);
         try {
             JSONObject jsonRoom = new JSONObject(json);
-            if(jsonRoom.has("floor"))
-                this.floor = jsonRoom.isNull("floor") ? 0 : jsonRoom.getInt("floor");
+            if(jsonRoom.has("Floor__c"))
+                this.floor = jsonRoom.isNull("Floor__c") ? 0 : jsonRoom.getInt("Floor__c");
+            if(jsonRoom.has("Map_X_Coordinate__c") && jsonRoom.has("Map_Y_Coordinate__c")){
+                double x = jsonRoom.isNull("Map_X_Coordinate__c") ? 0 : jsonRoom.getDouble("Map_X_Coordinate__c");
+                double y = jsonRoom.isNull("Map_Y_Coordinate__c") ? 0 : jsonRoom.getDouble("Map_Y_Coordinate__c");
+                this.location[0] = x;
+                this.location[1] = y;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

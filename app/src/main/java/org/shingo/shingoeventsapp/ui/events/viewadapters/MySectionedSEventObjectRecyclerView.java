@@ -10,8 +10,10 @@ import com.afollestad.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.middle.SEvent.SEventObject;
+import org.shingo.shingoeventsapp.middle.SEvent.SRoom;
 import org.shingo.shingoeventsapp.middle.SObject;
 import org.shingo.shingoeventsapp.middle.SectionedDataModel;
+import org.shingo.shingoeventsapp.ui.events.VenueDetailFragment;
 import org.shingo.shingoeventsapp.ui.interfaces.OnListFragmentInteractionListener;
 
 import java.util.List;

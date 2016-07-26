@@ -165,7 +165,7 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
     private void sortRoomsByFloor(int minFloor, int maxFloor){
         rooms.clear();
         for(int i = minFloor; i <= maxFloor; i++){
-            String floorName = i < 1 ? (i == 0 ? "Ground Floor" : "B" + String.valueOf(Math.abs(i))) : String.valueOf(i);
+            String floorName = i < 1 ? (i == 0 ? "Ground Floor" : "Floor B" + String.valueOf(Math.abs(i))) : "Floor " + String.valueOf(i);
             List<SRoom> floor = new ArrayList<>();
             for(SRoom r : mVenue.getRooms()){
                 if(r.getFloor() == i)
