@@ -138,7 +138,7 @@ public class MapFragment extends Fragment {
         }
 
         protected void onPostExecute(Bitmap result) {
-            if(mPin != null){
+            if(mPin != null && result != null){
                 Bitmap copy = result.copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(copy);
                 canvas.drawBitmap(marker, (float)mPin[0] - marker.getHeight() / 2, (float)mPin[1] - marker.getWidth() / 2, null);

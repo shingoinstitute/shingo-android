@@ -1,0 +1,21 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=3C:C4:26:3A:5F:C9:CA:AC:15:FF:4B:A7:5A:AF:B1:3E:A6:AD:F1:60%3Borg.shingo.shingoeventsapp.ui
+
+    You can also add your credentials to an existing key, using this line:
+    3C:C4:26:3A:5F:C9:CA:AC:15:FF:4B:A7:5A:AF:B1:3E:A6:AD:F1:60;org.shingo.shingoeventsapp.ui
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+         AIzaSyDUKsFVeNOI1J4s9NaVyjJbegjpyAUi-sg
+    </string>
+</resources>

@@ -63,7 +63,9 @@ public class SVenue extends SEventObject implements Parcelable {
         try {
             JSONObject jsonVenue = new JSONObject(json);
             if(jsonVenue.has("Venue_Location__c") && !jsonVenue.isNull("Venue_Location__c"))
-                this.location = new Location(jsonVenue.getJSONObject("Venue_Location__c").getDouble("Latitude"), jsonVenue.getJSONObject("Venue_Location__c").getDouble("Longitude"));
+                this.location = new Location(jsonVenue.getJSONObject("Venue_Location__c").getDouble("latitude"), jsonVenue.getJSONObject("Venue_Location__c").getDouble("longitude"));
+            else
+                this.location = new Location(41.7493263,-111.8017771);
             if(jsonVenue.has("Maps__r") && !jsonVenue.isNull("Maps__r")) {
                 JSONArray jsonMapsArray = jsonVenue.getJSONObject("Maps__r").getJSONArray("records");
                 for(int i = 0; i < jsonMapsArray.length(); i++){
@@ -198,6 +200,10 @@ public class SVenue extends SEventObject implements Parcelable {
         public Location(double latitude, double longitude){
             this.latitude = latitude;
             this.longitude = longitude;
+        }
+
+        public double[] getArray(){
+            return new double[]{latitude, longitude};
         }
 
         @SuppressWarnings("unused")

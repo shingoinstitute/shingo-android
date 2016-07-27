@@ -3,6 +3,7 @@ package org.shingo.shingoeventsapp.ui.events;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,8 @@ import org.shingo.shingoeventsapp.data.OnTaskCompleteListener;
 import org.shingo.shingoeventsapp.middle.SEvent.SRoom;
 import org.shingo.shingoeventsapp.middle.SEvent.SVenue;
 import org.shingo.shingoeventsapp.middle.SectionedDataModel;
+import org.shingo.shingoeventsapp.ui.MainActivity;
+import org.shingo.shingoeventsapp.ui.MapsActivity;
 import org.shingo.shingoeventsapp.ui.events.viewadapters.MySEventObjectRecyclerView;
 import org.shingo.shingoeventsapp.ui.events.viewadapters.MySectionedSEventObjectRecyclerView;
 import org.shingo.shingoeventsapp.ui.interfaces.EventInterface;
@@ -96,8 +99,9 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
             getVenueAsync.execute("/salesforce/events/venues/" + mVenueId);
 
             progress = ProgressDialog.show(getContext(), "", "Loading Venue...");
+        } else {
+            updateViews(view);
         }
-        updateViews(view);
         return view;
     }
 
@@ -140,6 +144,17 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
             @Override
             public void onClick(View view) {
                 mNavigation.changeFragment(MapListFragment.newInstance(mVenue));
+            }
+        });
+        view.findViewById(R.id.venue_address).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), MapsActivity.class);
+                Bundle args = new Bundle();
+                args.putDoubleArray(MapsActivity.ARG_PIN, mVenue.getLocation().getArray());
+                args.putString(MapsActivity.ARG_TITLE, mVenue.getName());
+                intent.putExtras(args);
+                startActivity(intent);
             }
         });
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.room_list);
