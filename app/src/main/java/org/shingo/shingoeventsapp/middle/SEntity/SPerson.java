@@ -81,23 +81,13 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
     public void fromJSON(String json) {
         super.fromJSON(json);
         try {
-            JSONObject jPerson = new JSONObject(json);
-            if(jPerson.has("Speaker_Title__c"))
-                this.title = (jPerson.isNull("Speaker_Title__c") ? null : jPerson.getString("Speaker_Title__c"));
-            if(jPerson.has("Organization__r"))
-                this.company = jPerson.isNull("Organization__r") ? "" : jPerson.getJSONObject("Organization__r").getString("Name");
-            if(jPerson.has("Session_Speaker_Associations__r") && !jPerson.isNull("Session_Speaker_Associations__r")){
-                JSONArray array = jPerson.getJSONObject("Session_Speaker_Associations__r").getJSONArray("records");
-                for(int i = 0; i < array.length(); i++){
-                    JSONObject obj = array.getJSONObject(i);
-                    if(obj.getJSONObject("Session__r").has("Session_Display_Name__c") && !obj.getJSONObject("Session__r").isNull("Session_Display_Name__c")) {
-                        if (obj.getJSONObject("Session__r").getString("Session_Display_Name__c").toLowerCase().contains("keynote")) {
-                            this.type = SPersonType.KeynoteSpeaker;
-                            break;
-                        }
-                    }
-                }
-            }
+            JSONObject jsonPerson = new JSONObject(json);
+            if(jsonPerson.has("Speaker_Title__c"))
+                this.title = (jsonPerson.isNull("Speaker_Title__c") ? null : jsonPerson.getString("Speaker_Title__c"));
+            if(jsonPerson.has("Organization__r"))
+                this.company = jsonPerson.isNull("Organization__r") ? "" : jsonPerson.getJSONObject("Organization__r").getString("Name");
+            if(jsonPerson.has("Session_Speaker_Associations__r"))
+                this.type = jsonPerson.isNull("Session_Speaker_Associations__r") ? SPersonType.ConcurrentSpeaker : SPersonType.KeynoteSpeaker;
         } catch (JSONException e) {
             e.printStackTrace();
         }
