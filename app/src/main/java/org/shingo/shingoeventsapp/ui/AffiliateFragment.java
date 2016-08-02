@@ -71,7 +71,7 @@ public class AffiliateFragment extends Fragment implements OnTaskCompleteListene
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        mAdapter = new MySEntityRecyclerViewAdapter(mAffiliates.affiliates(), mCache);
+        mAdapter = new MySEntityRecyclerViewAdapter(mAffiliates.affiliates());
         recyclerView.setAdapter(mAdapter);
 
         return view;

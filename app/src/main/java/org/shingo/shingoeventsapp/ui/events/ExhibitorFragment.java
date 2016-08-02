@@ -33,7 +33,6 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
-    private CacheInterface mCache;
 
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
@@ -76,7 +75,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
             progress = ProgressDialog.show(getContext(), "", "Loading Exhibitors");
         }
 
-        mAdapter = new MySEntityRecyclerViewAdapter(mEvents.getEvent(mEventId).getExhibitors(), mCache);
+        mAdapter = new MySEntityRecyclerViewAdapter(mEvents.getEvent(mEventId).getExhibitors());
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
@@ -88,11 +87,6 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof CacheInterface)
-            mCache = (CacheInterface) context;
-        else
-            throw new RuntimeException(context.toString() + " must implement CacheInterface");
-
         if(context instanceof EventInterface)
             mEvents = (EventInterface) context;
         else

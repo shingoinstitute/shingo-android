@@ -142,11 +142,16 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
                 mNavigate.navigateToId(R.id.nav_sponsors);
             }
         });
-        // TODO: Add venue views
         view.findViewById(R.id.event_venues).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mNavigate.navigateToId(R.id.nav_venues);
+            }
+        });
+        view.findViewById(R.id.event_attendees).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mNavigate.navigateToId(R.id.nav_attendees);
             }
         });
     }

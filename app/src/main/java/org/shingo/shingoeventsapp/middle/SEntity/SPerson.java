@@ -46,6 +46,13 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         fromJSON(json);
     }
 
+    public SPerson(String id, String name, String title, String company, SPersonType type){
+        super(id,name, "", null);
+        this.title = title;
+        this.company = company;
+        this.type = type;
+    }
+
     /**
      * @param id Salesforce Id
      * @param name Person's name
@@ -147,7 +154,8 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
         KeynoteSpeaker("Keynote Speaker"),
         ConcurrentSpeaker("Concurrent Speaker"),
         BoardMember("Board Member"),
-        AcademyMember("Academy Member");
+        AcademyMember("Academy Member"),
+        Attendee("Attendee");
 
         private String type;
         SPersonType(String type){

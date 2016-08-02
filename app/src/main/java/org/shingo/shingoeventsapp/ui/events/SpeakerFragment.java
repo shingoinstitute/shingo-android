@@ -21,7 +21,6 @@ import org.shingo.shingoeventsapp.middle.SectionedDataModel;
 import org.shingo.shingoeventsapp.middle.SEvent.SEvent;
 import org.shingo.shingoeventsapp.ui.events.viewadapters.MySEntityRecyclerViewAdapter;
 import org.shingo.shingoeventsapp.ui.events.viewadapters.MySectionedSEntityRecyclerViewAdapter;
-import org.shingo.shingoeventsapp.ui.interfaces.CacheInterface;
 import org.shingo.shingoeventsapp.ui.interfaces.OnErrorListener;
 import org.shingo.shingoeventsapp.ui.interfaces.EventInterface;
 
@@ -46,7 +45,6 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
 
     private OnErrorListener mErrorListener;
     private EventInterface mEvents;
-    private CacheInterface mCache;
 
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
@@ -99,11 +97,11 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
 
         SEvent event = mEvents.getEvent(mEventId);
         if(mSpeakerIds != null && event.hasCache(CACHE_KEY)){
-            mAdapter = new MySEntityRecyclerViewAdapter(event.getSpeakers(mSpeakerIds), mCache);
+            mAdapter = new MySEntityRecyclerViewAdapter(event.getSpeakers(mSpeakerIds));
         } else if(event.needsUpdated(CACHE_KEY)){
             GetAsyncData getSpeakersAsync = new GetAsyncData(this);
             getSpeakersAsync.execute("/salesforce/events/speakers", mSessionId == null ? ARG_EVENT_ID + "=" +mEventId : ARG_SESSION_ID + "=" + mSessionId);
-            mAdapter = isSectioned ? new MySectionedSEntityRecyclerViewAdapter(data) : new MySEntityRecyclerViewAdapter(event.getSpeakers(), mCache);
+            mAdapter = isSectioned ? new MySectionedSEntityRecyclerViewAdapter(data) : new MySEntityRecyclerViewAdapter(event.getSpeakers());
 
             progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
         } else {
@@ -128,11 +126,6 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof CacheInterface)
-            mCache = (CacheInterface) context;
-        else
-            throw new RuntimeException(context.toString() + " must implement CacheInterface");
-
         if (context instanceof EventInterface)
             mEvents = (EventInterface) context;
         else

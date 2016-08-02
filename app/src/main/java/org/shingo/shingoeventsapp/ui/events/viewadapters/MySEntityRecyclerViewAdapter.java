@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.middle.SEntity.SEntity;
-import org.shingo.shingoeventsapp.ui.interfaces.CacheInterface;
-
 import java.io.InputStream;
 import java.util.List;
 
@@ -26,11 +24,9 @@ import java.util.List;
 public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntityRecyclerViewAdapter.ViewHolder> {
 
     private final List<? extends SEntity> mValues;
-    private final CacheInterface mCache;
 
-    public MySEntityRecyclerViewAdapter(List<? extends SEntity> items, CacheInterface cache) {
+    public MySEntityRecyclerViewAdapter(List<? extends SEntity> items) {
         mValues = items;
-        mCache = cache;
     }
 
     @Override
@@ -56,7 +52,10 @@ public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntity
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(holder.mItem.getName());
         holder.mDetailView.setText(holder.mItem.getDetail());
-        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
+        if(holder.mItem.getSummary().equals(""))
+            holder.mView.findViewById(R.id.expand_entity_summary).setVisibility(View.GONE);
+        else
+            holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
 
         if(holder.mItem.getImage() == null) {
             holder.mPictureView.setVisibility(View.INVISIBLE);
@@ -111,7 +110,7 @@ public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntity
                 InputStream in = new java.net.URL(url).openStream();
                 bitmap = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                Log.e("Error", e.getMessage());
+                Log.e("Error", "Exception Message: " + e.getLocalizedMessage());
                 e.printStackTrace();
             }
             return bitmap;

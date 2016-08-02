@@ -65,7 +65,7 @@ public abstract class SEntity extends SObject {
      * Getter for {@link #imageUrl}
      * @return {@link #imageUrl}
      */
-    public String getImageUrl() { return imageUrl; }
+    public String getImageUrl() { return imageUrl != null ? imageUrl : "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png"; }
 
     /**
      * Getter for {@link #summary}

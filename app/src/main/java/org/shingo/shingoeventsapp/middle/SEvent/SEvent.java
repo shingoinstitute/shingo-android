@@ -41,6 +41,7 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
     private Bitmap banner;
     private List<SDay> agenda = new ArrayList<>();
     private List<SPerson> speakers = new ArrayList<>();
+    private List<SPerson> attendees = new ArrayList<>();
     private List<SSession> sessions = new ArrayList<>();
     private List<SOrganization> exhibitors = new ArrayList<>();
     private List<SSponsor> sponsors = new ArrayList<>();
@@ -151,6 +152,10 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
         return speakers.subList(start, end + 1);
     }
 
+    public List<SPerson> getAttendees() {
+        return attendees;
+    }
+
     public List<SOrganization> getExhibitors() {
         return exhibitors;
     }
@@ -214,6 +219,18 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
                 this.salesText = jsonEvent.isNull("Sales_Text__c") ? "" : jsonEvent.getString("Sales_Text__c");
             if(jsonEvent.has("Banner_URL__c"))
                 this.bannerUrl = jsonEvent.isNull("Banner_URL__c") ? "" : jsonEvent.getString("Banner_URL__c");
+            if(jsonEvent.has("Shingo_Attendees__r") && !jsonEvent.isNull("Shingo_Attendees__r")){
+                attendees.clear();
+                JSONArray jsonAttendees = jsonEvent.getJSONObject("Shingo_Attendees__r").getJSONArray("records");
+                for(int i = 0; i < jsonAttendees.length(); i++){
+                    JSONObject jsonAttendee = jsonAttendees.getJSONObject(i);
+                    SPerson person = new SPerson(jsonAttendee.getJSONObject("Contact__r").getString("Id"),
+                            (jsonAttendee.isNull("Badge_Name__c") ? jsonAttendee.getJSONObject("Contact__r").getString("Name") : jsonAttendee.getString("Badge_Name__c")),
+                            (jsonAttendee.isNull("Badge_Title__c") ? jsonAttendee.getJSONObject("Contact__r").getString("Title") : jsonAttendee.getString("Badge_Title__c")),
+                            jsonAttendee.getJSONObject("Contact__r").getJSONObject("Account").getString("Name"), SPerson.SPersonType.Attendee);
+                    attendees.add(person);
+                }
+            }
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }

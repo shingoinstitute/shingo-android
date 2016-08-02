@@ -197,6 +197,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_venues:
                 replaceFragment(VenueFragment.newInstance(eventId));
                 break;
+            case R.id.nav_attendees:
+                replaceFragment(AttendeeFragment.newInstance(eventId));
+                break;
             case R.id.nav_events:
                 replaceFragment(EventFragment.newInstance());
                 break;

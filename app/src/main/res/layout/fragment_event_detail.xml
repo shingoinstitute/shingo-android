@@ -135,6 +135,15 @@
                     android:layout_margin="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
+                <TextView
+                    android:id="@+id/event_attendees"
+                    android:drawableStart="@drawable/ic_people_outline"
+                    android:drawablePadding="5dp"
+                    android:text="Attendees"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
             </GridLayout>
         </android.support.v7.widget.CardView>
 

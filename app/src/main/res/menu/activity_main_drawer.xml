@@ -36,6 +36,10 @@
                     android:id="@+id/nav_venues"
                     android:icon="@drawable/ic_business"
                     android:title="Venues" />
+                <item
+                    android:id="@+id/nav_attendees"
+                    android:icon="@drawable/ic_people_outline"
+                    android:title="Attendees" />
             </menu>
         </item>
         <item android:title="Shingo App">
