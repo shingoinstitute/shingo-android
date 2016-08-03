@@ -116,13 +116,15 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                JSONArray jEvents = result.getJSONArray("events");
+                JSONArray jsonEvents = result.getJSONArray("events");
                 mEvents.clearEvents();
                 mCache.updateTime(CacheInterface.CacheType.Events);
-                for(int i = 0; i < jEvents.length(); i++){
-                    SEvent event = new SEvent();
-                    event.fromJSON(jEvents.getJSONObject(i).toString());
-                    mEvents.addEvent(event);
+                for(int i = 0; i < jsonEvents.length(); i++){
+                    if(jsonEvents.getJSONObject(i).getBoolean("Publish_to_Web_App__c")) {
+                        SEvent event = new SEvent();
+                        event.fromJSON(jsonEvents.getJSONObject(i).toString());
+                        mEvents.addEvent(event);
+                    }
                 }
             }
         } catch (JSONException e) {

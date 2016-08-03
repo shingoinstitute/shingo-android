@@ -2,7 +2,6 @@ package org.shingo.shingoeventsapp.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -26,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.appsee.Appsee;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 import org.shingo.shingoeventsapp.R;
@@ -64,7 +62,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
-//        Appsee.start(getString(R.string.com_appsee_apikey));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -208,6 +205,12 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_model:
                 replaceFragment(ModelFragment.newInstance());
+                break;
+            case R.id.nav_support:
+                replaceFragment(BugFragment.newInstance());
+                break;
+            case R.id.nav_feedback:
+                replaceFragment(FeedbackFragment.newInstance());
                 break;
             case R.id.nav_home:
             default:
