@@ -16,7 +16,7 @@
         android:layout_height="wrap_content" />
     <org.shingo.shingoeventsapp.ui.TouchImageView
         android:id="@+id/map"
-        android:src="@drawable/ic_refresh_white"
+        android:src="@drawable/square"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

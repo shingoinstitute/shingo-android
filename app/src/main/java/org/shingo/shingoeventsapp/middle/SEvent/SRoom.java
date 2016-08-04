@@ -23,7 +23,7 @@ public class SRoom extends SEventObject implements Comparable<SObject>,Parcelabl
 
     @Override
     public String getDetail() {
-        return "Floor: " + String.valueOf(floor);
+        return "";
     }
 
     public String getVenueId() {

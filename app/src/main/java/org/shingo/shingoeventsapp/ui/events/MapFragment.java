@@ -1,19 +1,24 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-
-import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.PointF;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import org.shingo.shingoeventsapp.R;
@@ -35,6 +40,7 @@ public class MapFragment extends Fragment {
 
     private Bitmap map;
     private ProgressBar progress;
+
 
     public MapFragment() {
         // Required empty public constructor
@@ -75,6 +81,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mUrl = getArguments().getString(ARG_URL);
             if(getArguments().containsKey(ARG_PIN))
@@ -88,6 +95,20 @@ public class MapFragment extends Fragment {
         map.recycle();
     }
 
+    private Bitmap changeBitmapColor(Bitmap sourceBitmap, int color) {
+
+        Bitmap resultBitmap = Bitmap.createBitmap(sourceBitmap, 0, 0,
+                sourceBitmap.getWidth(), sourceBitmap.getHeight());
+        Paint p = new Paint();
+        ColorFilter filter = new LightingColorFilter(color, 1);
+        p.setColorFilter(filter);
+
+        Canvas canvas = new Canvas(resultBitmap);
+        canvas.drawBitmap(resultBitmap, 0, 0, p);
+
+        return resultBitmap;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,20 +120,37 @@ public class MapFragment extends Fragment {
             DownloadImageTask downloadImageTask = new DownloadImageTask(((TouchImageView)view.findViewById(R.id.map)));
             downloadImageTask.execute(mUrl);
         } else {
-            progress.setVisibility(View.GONE);
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            opt.inMutable = true;
+            Bitmap pinBitmap = changeBitmapColor(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on, opt),40,40,false), getResources().getColor(R.color.colorPrimaryDark));
+
             TouchImageView touchImageView = (TouchImageView) view.findViewById(R.id.map);
             if(mPin != null){
                 Bitmap copy = map.copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(copy);
-                canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on), (float)mPin[0], (float)mPin[1], null);
+                canvas.drawBitmap(pinBitmap, (float)mPin[0], (float)mPin[1], null);
                 touchImageView.setImageBitmap(copy);
             } else {
                 touchImageView.setImageBitmap(map);
             }
             touchImageView.resetZoom();
+
+            progress.setVisibility(View.GONE);
         }
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Do something that differs the Activity's menu here
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.findItem(R.id.action_settings).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return getActivity().onOptionsItemSelected(item);
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
@@ -121,7 +159,9 @@ public class MapFragment extends Fragment {
 
         public DownloadImageTask(TouchImageView view) {
             this.view = view;
-            marker = BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on);
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            opt.inMutable = true;
+            marker = changeBitmapColor(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_on, opt),40,40,false), getResources().getColor(R.color.colorPrimaryDark));
         }
 
         protected Bitmap doInBackground(String... urls) {

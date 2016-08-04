@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,8 @@ import java.util.List;
 public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntityRecyclerViewAdapter.ViewHolder> {
 
     private final List<? extends SEntity> mValues;
+    private ViewGroup mParent;
+    private int mExpandedPosition = -1;
 
     public MySEntityRecyclerViewAdapter(List<? extends SEntity> items) {
         mValues = items;
@@ -33,20 +36,22 @@ public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntity
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_sentity, parent, false);
+        if(mParent == null) mParent = parent;
         return new ViewHolder(view);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        final boolean isExpanded = position == mExpandedPosition;
+        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
-                if(holder.mSummaryView.getVisibility() == View.VISIBLE)
-                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_less);
-                else
-                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_more);
+                mExpandedPosition = isExpanded ? -1 : holder.getAdapterPosition();
+                TransitionManager.beginDelayedTransition(mParent);
+                notifyDataSetChanged();
             }
         });
         holder.mItem = mValues.get(position);

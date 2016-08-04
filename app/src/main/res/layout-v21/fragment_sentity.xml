@@ -8,7 +8,8 @@
     android:layout_marginBottom="5dp"
     android:layout_marginTop="5dp"
     card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="@dimen/z_card">
+    card_view:cardElevation="@dimen/z_card"
+    android:stateListAnimator="@anim/comment_selection">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

@@ -9,6 +9,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -79,6 +82,7 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mVenueId = getArguments().getString(ARG_VENUE_ID);
             mEventId = getArguments().getString(ARG_EVENT_ID);
@@ -101,6 +105,18 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
             updateViews(view);
         }
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Do something that differs the Activity's menu here
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.findItem(R.id.action_settings).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return getActivity().onOptionsItemSelected(item);
     }
 
     @Override
@@ -178,7 +194,13 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
     private void sortRoomsByFloor(int minFloor, int maxFloor){
         rooms.clear();
         for(int i = minFloor; i <= maxFloor; i++){
-            String floorName = i < 1 ? (i == 0 ? "Ground Floor" : "Floor B" + String.valueOf(Math.abs(i))) : "Floor " + String.valueOf(i);
+            String floorName = "";
+            for(SVenue.VenueMap map : mVenue.getMaps()){
+                if(map.getFloor() == i){
+                    floorName = map.getName();
+                    break;
+                }
+            }
             List<SRoom> floor = new ArrayList<>();
             for(SRoom r : mVenue.getRooms()){
                 if(r.getFloor() == i)

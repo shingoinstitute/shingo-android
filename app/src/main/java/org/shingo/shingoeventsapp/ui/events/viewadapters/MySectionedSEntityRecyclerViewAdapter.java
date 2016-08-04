@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,8 @@ import java.util.List;
 public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerViewAdapter<RecyclerView.ViewHolder> {
 
     private final List<SectionedDataModel> mData;
+    private int mExpandedPosition = -1;
+    private ViewGroup mParent;
 
     public MySectionedSEntityRecyclerViewAdapter(List<SectionedDataModel> data){
         mData = data;
@@ -51,18 +54,18 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder vh, int section, int relativePosition, int absolutePosition) {
+    public void onBindViewHolder(RecyclerView.ViewHolder vh, int section, int relativePosition, final int absolutePosition) {
         List<? extends SObject> items = mData.get(section).getItems();
-
+        final boolean isExpanded = absolutePosition == mExpandedPosition;
         final ItemViewHolder holder = (ItemViewHolder) vh;
+        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
-                if(holder.mSummaryView.getVisibility() == View.VISIBLE)
-                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_less);
-                else
-                    ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(R.drawable.ic_expand_more);
+                mExpandedPosition = isExpanded ? -1 : absolutePosition;
+                TransitionManager.beginDelayedTransition(mParent);
+                notifyDataSetChanged();
             }
         });
         holder.mItem = (SEntity)items.get(relativePosition);
@@ -81,6 +84,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if(mParent == null) mParent = parent;
         View v = null;
         switch (viewType){
             case SectionedRecyclerViewAdapter.VIEW_TYPE_HEADER:

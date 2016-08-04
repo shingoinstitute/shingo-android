@@ -2,6 +2,7 @@ package org.shingo.shingoeventsapp.ui.events.viewadapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,9 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
     private List<SSession> mValues;
     private final OnListFragmentInteractionListener mListener;
 
+    private ViewGroup mParent;
+    private int mExpandedPosition = -1;
+
     public MySessionRecyclerViewAdapter(List<SSession> items, OnListFragmentInteractionListener listener){
         mValues = items;
         mListener = listener;
@@ -33,11 +37,15 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_session, parent, false);
+        if(mParent == null) mParent = parent;
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        final boolean isExpanded = position == mExpandedPosition;
+        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource( isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(holder.mItem.getName());
         holder.mTimeView.setText(holder.mItem.getTimeString());
@@ -46,11 +54,9 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.mSummaryView.setVisibility((holder.mSummaryView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
-                if(holder.mSummaryView.getVisibility() == View.VISIBLE)
-                    ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(R.drawable.ic_expand_less);
-                else
-                    ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(R.drawable.ic_expand_more);
+                mExpandedPosition = isExpanded ? -1 : holder.getAdapterPosition();
+                TransitionManager.beginDelayedTransition(mParent);
+                notifyDataSetChanged();
             }
         });
 
