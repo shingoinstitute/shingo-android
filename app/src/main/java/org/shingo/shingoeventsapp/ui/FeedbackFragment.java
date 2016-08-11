@@ -190,7 +190,7 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
             } else {
                 throw new JSONException("Request was unsuccessful");
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             onTaskError("");
         }
@@ -199,7 +199,8 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
     @Override
     public void onTaskError(String error) {
         progress.dismiss();
-        mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your feedback. Please let us know at shingo.development@usu.edu!");
+        if(mErrorListener != null)
+            mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your feedback. Please let us know at shingo.development@usu.edu!");
     }
 
     private void closeKeyboard(){

@@ -144,7 +144,7 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -156,7 +156,8 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError(error);
+        if(mErrorListener != null)
+            mErrorListener.handleError(error);
         progress.dismiss();
     }
 

@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,7 +53,6 @@ public class MapListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mVenue = getArguments().getParcelable(ARG_VENUE);
         }
@@ -63,28 +63,16 @@ public class MapListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map_list, container, false);
-        mMapsPagerAdapter = new MapsPagerAdapter(getActivity().getSupportFragmentManager(), mVenue.getMaps());
         mViewPager = (ViewPager) view;
-        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
+        mMapsPagerAdapter = new MapsPagerAdapter(getChildFragmentManager(), mVenue.getMaps());
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
-            public void onPageSelected(int position){
+            public void onPageSelected(int position) {
                 mViewPager.setCurrentItem(position, true);
             }
         });
         mViewPager.setAdapter(mMapsPagerAdapter);
 
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Do something that differs the Activity's menu here
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.findItem(R.id.action_settings).setVisible(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return getActivity().onOptionsItemSelected(item);
     }
 }

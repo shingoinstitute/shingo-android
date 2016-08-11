@@ -81,7 +81,6 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mUrl = getArguments().getString(ARG_URL);
             if(getArguments().containsKey(ARG_PIN))
@@ -92,7 +91,8 @@ public class MapFragment extends Fragment {
     @Override
     public void onPause(){
         super.onPause();
-        map.recycle();
+        if(map != null)
+            map.recycle();
     }
 
     private Bitmap changeBitmapColor(Bitmap sourceBitmap, int color) {
@@ -117,6 +117,7 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         progress = (ProgressBar) view.findViewById(R.id.map_progress);
         if(map == null){
+            progress.setVisibility(View.VISIBLE);
             DownloadImageTask downloadImageTask = new DownloadImageTask(((TouchImageView)view.findViewById(R.id.map)));
             downloadImageTask.execute(mUrl);
         } else {
@@ -139,18 +140,6 @@ public class MapFragment extends Fragment {
         }
 
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Do something that differs the Activity's menu here
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.findItem(R.id.action_settings).setVisible(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return getActivity().onOptionsItemSelected(item);
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {

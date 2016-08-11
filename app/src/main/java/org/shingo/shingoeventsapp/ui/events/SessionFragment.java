@@ -185,7 +185,7 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         Collections.sort(mEvents.getEvent(mEventId).getSessions());
@@ -201,7 +201,8 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError(error);
+        if(mErrorListener != null)
+            mErrorListener.handleError(error);
         progress.dismiss();
     }
 

@@ -221,7 +221,7 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
                     mVenue.fromJSON(result.getJSONObject("venue").toString());
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -231,6 +231,8 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError(error);
+        progress.dismiss();
+        if(mErrorListener != null)
+            mErrorListener.handleError(error);
     }
 }

@@ -3,6 +3,8 @@ package org.shingo.shingoeventsapp.ui.events.viewadapters;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
+import android.view.ViewGroup;
 
 import org.shingo.shingoeventsapp.middle.SEvent.SVenue;
 import org.shingo.shingoeventsapp.ui.events.MapFragment;
@@ -25,6 +27,7 @@ public class MapsPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
+        Log.d(getClass().getName(), "GetItem(" + position + ")");
         return MapFragment.newInstance(mMaps.get(position).getUrl());
     }
 

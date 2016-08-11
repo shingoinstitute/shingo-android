@@ -188,7 +188,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
             } else {
                 throw new JSONException("Request was unsuccessful");
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             progress.dismiss();
             onTaskError("");
@@ -197,7 +197,9 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your bug report. Please let us know at shingo.development@usu.edu!");
+        if(mErrorListener != null)
+            mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your bug report. Please let us know at shingo.development@usu.edu!");
+        progress.dismiss();
     }
 
     private void closeKeyboard(){

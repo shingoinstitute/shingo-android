@@ -245,7 +245,7 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
                     mEvent.fromJSON(result.getJSONObject("event").toString());
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -255,7 +255,8 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError(error);
+        if(mErrorListener != null)
+            mErrorListener.handleError(error);
         progress.dismiss();
     }
 }

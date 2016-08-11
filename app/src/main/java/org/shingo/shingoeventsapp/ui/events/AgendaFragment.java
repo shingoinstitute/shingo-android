@@ -155,7 +155,7 @@ public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
                     mEvents.getEvent(mEventId).getAgenda().add(day);
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         Collections.sort(mEvents.getEvent(mEventId).getAgenda());
@@ -165,7 +165,8 @@ public class AgendaFragment extends Fragment implements OnTaskCompleteListener {
 
     @Override
     public void onTaskError(String error) {
-        mErrorListener.handleError(error);
+        if(mErrorListener != null)
+            mErrorListener.handleError(error);
         progress.dismiss();
     }
 }
