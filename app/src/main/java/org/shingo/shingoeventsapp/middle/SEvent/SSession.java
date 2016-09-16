@@ -65,7 +65,7 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
             this.name = (jsonSession.isNull("Session_Display_Name__c") ? "Session" : jsonSession.getString("Session_Display_Name__c"));
             if(jsonSession.has("Summary__c"))
                 this.summary = jsonSession.isNull("Summary__c") ? "Summary coming soon!" : jsonSession.getString("Summary__c");
-            if(jsonSession.has("Room__r")) {
+            if(jsonSession.has("Room__r") && !jsonSession.isNull("Room__r")) {
                 this.room = new SRoom();
                 this.room.fromJSON(jsonSession.getJSONObject("Room__r").toString());
             }

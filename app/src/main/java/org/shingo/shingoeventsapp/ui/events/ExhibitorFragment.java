@@ -133,6 +133,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
                     mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                     for(int i = 0; i < jExhibitors.length(); i++){
                         SOrganization org = new SOrganization();
+                        jExhibitors.getJSONObject(i).getJSONObject("Organization__r").put("Id", jExhibitors.getJSONObject(i).getString("Id"));
                         org.fromJSON(jExhibitors.getJSONObject(i).getJSONObject("Organization__r").toString());
                         org.type = SOrganization.SOrganizationType.Exhibitor;
                         mEvents.getEvent(mEventId).getExhibitors().add(org);

@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,9 +37,13 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
         super.fromJSON(json);
         try {
             JSONObject jsonRecipient = new JSONObject(json);
-
+            if(jsonRecipient.has("Organization__r")) {
+                this.name = (jsonRecipient.getJSONObject("Organization__r").isNull("Name") ? "" : jsonRecipient.getJSONObject("Organization__r").getString("Name"));
+                this.imageUrl = jsonRecipient.getJSONObject("Organization__r").getString("Logo__c");
+            }
             if(jsonRecipient.has("Award_Type__c"))
-                setTypeFromString(jsonRecipient.getString("Award_Type__c"));
+            setTypeFromString(jsonRecipient.getString("Award_Type__c"));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -55,7 +60,8 @@ public class SRecipient extends SEntity implements Comparable<SObject>,Parcelabl
 
     @Override
     protected void setTypeFromString(String type) {
-        this.award = SRecipientAward.valueOf(type.replace("\\s",""));
+        this.award = SRecipientAward.valueOf(type.replaceAll("\\s",""));
+        Log.d("RECIPIENT", "Award: " + this.award);
     }
 
     public String getAuthor(){

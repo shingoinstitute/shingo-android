@@ -3,6 +3,7 @@ package org.shingo.shingoeventsapp.ui.events.viewadapters;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.transition.TransitionManager;
@@ -49,7 +50,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
         String day = mData.get(section).getHeader();
         SectionViewHolder sectionViewHolder = (SectionViewHolder) holder;
-        sectionViewHolder.sectionTitle.setText(day + "s");
+        sectionViewHolder.sectionTitle.setText(String.format("%ss", day));
     }
 
     @SuppressWarnings("deprecation")
@@ -58,21 +59,24 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
         List<? extends SObject> items = mData.get(section).getItems();
         final boolean isExpanded = absolutePosition == mExpandedPosition;
         final ItemViewHolder holder = (ItemViewHolder) vh;
-        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
+        holder.mItem = (SEntity)items.get(relativePosition);
+        holder.mNameView.setText(holder.mItem.getName());
+        holder.mDetailView.setText(holder.mItem.getDetail());
+        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
+        holder.mView.findViewById(R.id.expanded_entity_view).setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : absolutePosition;
                 TransitionManager.beginDelayedTransition(mParent);
+                if(!isExpanded)
+                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
+                else
+                    holder.mSummaryView.setText("");
                 notifyDataSetChanged();
             }
         });
-        holder.mItem = (SEntity)items.get(relativePosition);
-        holder.mNameView.setText(holder.mItem.getName());
-        holder.mDetailView.setText(holder.mItem.getDetail());
-        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
-
         if(holder.mItem.getImage() == null) {
             holder.mPictureView.setVisibility(View.INVISIBLE);
             DownloadImageTask downloadImageTask = new DownloadImageTask(holder.mPictureView, holder.mItem);
@@ -119,6 +123,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
         public final TextView mNameView;
         public final TextView mDetailView;
         public final TextView mSummaryView;
+        public final View mExpandedView;
         public SEntity mItem;
 
         public ItemViewHolder(View view) {
@@ -128,6 +133,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
             mNameView = (TextView) view.findViewById(R.id.entity_name);
             mDetailView = (TextView) view.findViewById(R.id.entity_detail);
             mSummaryView = (TextView) view.findViewById(R.id.entity_summary);
+            mExpandedView = view.findViewById(R.id.expanded_entity_view);
         }
 
         @Override

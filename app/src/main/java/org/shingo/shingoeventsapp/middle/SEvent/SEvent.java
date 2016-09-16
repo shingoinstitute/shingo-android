@@ -227,7 +227,7 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
                     SPerson person = new SPerson(jsonAttendee.getJSONObject("Contact__r").getString("Id"),
                             (jsonAttendee.isNull("Badge_Name__c") ? jsonAttendee.getJSONObject("Contact__r").getString("Name") : jsonAttendee.getString("Badge_Name__c")),
                             (jsonAttendee.isNull("Badge_Title__c") ? jsonAttendee.getJSONObject("Contact__r").getString("Title") : jsonAttendee.getString("Badge_Title__c")),
-                            jsonAttendee.getJSONObject("Contact__r").getJSONObject("Account").getString("Name"), SPerson.SPersonType.Attendee);
+                            (jsonAttendee.getJSONObject("Contact__r").isNull("Account") ? "" : jsonAttendee.getJSONObject("Contact__r").getJSONObject("Account").getString("Name")), SPerson.SPersonType.Attendee);
                     attendees.add(person);
                 }
             }

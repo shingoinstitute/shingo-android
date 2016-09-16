@@ -177,6 +177,6 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
                 group.add(p);
         }
 
-        return new SectionedDataModel(award.toString(), group);
+        return new SectionedDataModel(award.toString() + " Recipient", group);
     }
 }

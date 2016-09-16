@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +20,7 @@ import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
 import org.shingo.shingoeventsapp.data.OnTaskCompleteListener;
 import org.shingo.shingoeventsapp.middle.SEvent.SEvent;
+import org.shingo.shingoeventsapp.middle.SEvent.SVenue;
 import org.shingo.shingoeventsapp.ui.MainActivity;
 import org.shingo.shingoeventsapp.ui.interfaces.NavigationInterface;
 import org.shingo.shingoeventsapp.ui.interfaces.OnErrorListener;
@@ -243,6 +245,33 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
                 if(result.has("event")){
                     mEvent.updatePullTime(CACHE_KEY + mEventId);
                     mEvent.fromJSON(result.getJSONObject("event").toString());
+                    GetAsyncData data = new GetAsyncData(new OnTaskCompleteListener() {
+                        @Override
+                        public void onTaskComplete(String response) {
+                            try {
+                                JSONObject result = new JSONObject(response);
+                                Log.d("EVENT VENUE CALL", response);
+                                if (result.getBoolean("success")) {
+                                    mEvent.getVenues().clear();
+                                    for (int i = 0; i < result.getJSONArray("venues").length(); i++) {
+                                        JSONObject jsonVenue = result.getJSONArray("venues").getJSONObject(i);
+                                        SVenue mVenue = new SVenue();
+                                        mVenue.fromJSON(jsonVenue.toString());
+                                        mEvent.getVenues().add(mVenue);
+                                        mEvent.updatePullTime("venue" + mVenue.getId());
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onTaskError(String error) {
+
+                        }
+                    });
+                    data.execute("/salesforce/events/venues?event_id=" + mEvent.getId());
                 }
             }
         } catch (Exception e) {
