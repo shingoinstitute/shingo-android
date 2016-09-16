@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +59,8 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
     private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
+    private ProgressDialog progressDialog;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -114,8 +116,12 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
             GetAsyncData getSessionsAsync = new GetAsyncData(this);
             getSessionsAsync.execute("/salesforce/events/sessions/", (mAgendaId == null ? ARG_EVENT_ID + "=" + mEventId : ARG_AGENDA_ID + "=" + mAgendaId));
             mAdapter = isSectioned ? new MySectionedSessionRecyclerViewAdapter(data, mListener) : new MySessionRecyclerViewAdapter(event.getSessions(), mListener);
-
-            progress = ProgressDialog.show(getContext(), "", "Loading Sessions...");
+            if(view.findViewById(R.id.progressBar) != null){
+                progress = (ProgressBar) view.findViewById(R.id.progressBar);
+                progress.setVisibility(View.VISIBLE);
+            } else {
+                progressDialog = ProgressDialog.show(getContext(), "", "Loading Sessions...");
+            }
         } else {
             sectionSessions(event.getSessions());
             mAdapter = new MySectionedSessionRecyclerViewAdapter(data, mListener);
@@ -196,14 +202,20 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
             getActivity().setTitle(getTitle(mEvents.getEvent(mEventId).getSessions().get(0)));
 
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        if(progressDialog != null)
+            progressDialog.dismiss();
+        else
+            progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        if(progressDialog != null)
+            progressDialog.dismiss();
+        else
+            progress.setVisibility(View.GONE);
     }
 
     private void sectionSessions(List<SSession> sessions){

@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +52,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
 
     private RecyclerView.Adapter mAdapter;
     private ProgressDialog progress;
+    private ProgressBar progressBar;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -105,8 +107,12 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
             GetAsyncData getSpeakersAsync = new GetAsyncData(this);
             getSpeakersAsync.execute("/salesforce/events/speakers", mSessionId == null ? ARG_EVENT_ID + "=" +mEventId : ARG_SESSION_ID + "=" + mSessionId);
             mAdapter = isSectioned ? new MySectionedSEntityRecyclerViewAdapter(data) : new MySEntityRecyclerViewAdapter(event.getSpeakers());
-
-            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
+            if(view.findViewById(R.id.progressBar) != null){
+                progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.VISIBLE);
+            } else {
+                progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
+            }
         } else {
             sectionSpeakers(event.getSpeakers());
             mAdapter = new MySectionedSEntityRecyclerViewAdapter(data);
@@ -183,14 +189,20 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
             sectionSpeakers(mEvents.getEvent(mEventId).getSpeakers());
 
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        if(progressBar != null)
+            progressBar.setVisibility(View.GONE);
+        else
+            progress.dismiss();
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        if(progressBar != null)
+            progressBar.setVisibility(View.GONE);
+        else
+            progress.dismiss();
     }
 
     private void sectionSpeakers(List<SPerson> speakers){

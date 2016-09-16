@@ -44,13 +44,17 @@ public class MySEntityRecyclerViewAdapter extends RecyclerView.Adapter<MySEntity
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final boolean isExpanded = position == mExpandedPosition;
-        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.mView.findViewById(R.id.expanded_entity_view).setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : holder.getAdapterPosition();
                 TransitionManager.beginDelayedTransition(mParent);
+                if(!isExpanded)
+                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
+                else
+                    holder.mSummaryView.setText("");
                 notifyDataSetChanged();
             }
         });

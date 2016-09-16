@@ -10,4 +10,4 @@
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="org.shingo.shingoeventsapp.ui.events.AttendeeFragment"
-    tools:listitem="@layout/fragment_attendee" />
+    tools:listitem="@layout/fragment_sentity" />
