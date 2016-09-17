@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -60,7 +58,6 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
 
     private RecyclerView.Adapter mAdapter;
     private ProgressBar progress;
-    private ProgressDialog progressDialog;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -112,19 +109,18 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
         if(!isSectioned && event.hasCache(CACHE_KEY)) {
             getActivity().setTitle(getTitle(event.getSessions(mSessionIds).get(0)));
             mAdapter = new MySessionRecyclerViewAdapter(event.getSessions(mSessionIds), mListener);
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         } else if(event.needsUpdated(CACHE_KEY)) {
             GetAsyncData getSessionsAsync = new GetAsyncData(this);
             getSessionsAsync.execute("/salesforce/events/sessions/", (mAgendaId == null ? ARG_EVENT_ID + "=" + mEventId : ARG_AGENDA_ID + "=" + mAgendaId));
             mAdapter = isSectioned ? new MySectionedSessionRecyclerViewAdapter(data, mListener) : new MySessionRecyclerViewAdapter(event.getSessions(), mListener);
-            if(view.findViewById(R.id.progressBar) != null){
-                progress = (ProgressBar) view.findViewById(R.id.progressBar);
-                progress.setVisibility(View.VISIBLE);
-            } else {
-                progressDialog = ProgressDialog.show(getContext(), "", "Loading Sessions...");
-            }
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+            progress.setVisibility(View.VISIBLE);
         } else {
             sectionSessions(event.getSessions());
             mAdapter = new MySectionedSessionRecyclerViewAdapter(data, mListener);
+
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -200,22 +196,18 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
             sectionSessions(mEvents.getEvent(mEventId).getSessions());
         else
             getActivity().setTitle(getTitle(mEvents.getEvent(mEventId).getSessions().get(0)));
+        if(mEvents.getEvent(mEventId).getSessions().size() == 0 && getView() != null)
+            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
 
         mAdapter.notifyDataSetChanged();
-        if(progressDialog != null)
-            progressDialog.dismiss();
-        else
-            progress.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        if(progressDialog != null)
-            progressDialog.dismiss();
-        else
-            progress.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
     }
 
     private void sectionSessions(List<SSession> sessions){

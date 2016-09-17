@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -45,7 +44,7 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
     private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -81,7 +80,9 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
             GetAsyncData getRecipientsAsync = new GetAsyncData(this);
             getRecipientsAsync.execute("/salesforce/events/recipients", ARG_ID + "=" + mEventId);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Recipients");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+        } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -151,14 +152,16 @@ public class RecipientFragment extends Fragment implements OnTaskCompleteListene
         sectionRecipients(mEvents.getEvent(mEventId).getRecipients());
 
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        if(mEvents.getEvent(mEventId).getRecipients().isEmpty() && getView() != null)
+            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     private void sectionRecipients(List<SRecipient> sponsors){

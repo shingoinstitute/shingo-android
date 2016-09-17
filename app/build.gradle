@@ -32,8 +32,9 @@ android {
         applicationId "org.shingo.shingoeventsapp"
         minSdkVersion 19
         targetSdkVersion 24
-        versionCode 16
+        versionCode 17
         versionName '2.0'
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -70,4 +71,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:9.4.0'
     compile 'com.google.android.gms:play-services-auth:9.4.0'
     compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    compile 'com.android.support:multidex:1.0.1'
 }

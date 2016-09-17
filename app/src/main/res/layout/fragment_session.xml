@@ -31,7 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem" />
-        <!-- TODO: Add room name and link to room -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"

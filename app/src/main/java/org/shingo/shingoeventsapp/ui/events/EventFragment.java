@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -40,7 +39,7 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
     private EventInterface mEvents;
     private CacheInterface mCache;
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -70,8 +69,10 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
         if(mCache.needsUpdated(CacheInterface.CacheType.Events)) {
             GetAsyncData getEventsAsync = new GetAsyncData(this);
             getEventsAsync.execute("/salesforce/events");
-
-            progress = ProgressDialog.show(getContext(), "", "Loading Events", true);
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+            progress.setVisibility(View.VISIBLE);
+        } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -149,14 +150,16 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
 
         mEvents.sortEvents();
         mAdapter.notifyDataSetChanged();
+        if(mEvents.events().size() == 0 && getView() != null)
+            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
 
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 }

@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -47,7 +46,7 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
     private EventInterface mEvents;
     private OnErrorListener mErrorListener;
 
-    private ProgressDialog progress;
+    private ProgressBar progress;
     private SEvent mEvent;
 
     /**
@@ -97,9 +96,10 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
         if(mEvent.needsUpdated(CACHE_KEY + mEventId)) {
             GetAsyncData getEventAsync = new GetAsyncData(this);
             getEventAsync.execute("/salesforce/events/" + mEventId);
-            progress = ProgressDialog.show(getContext(), "", "Loading Event...");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
         } else {
             updateViews(view);
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         setOnClickListeners(view);
@@ -268,7 +268,9 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
 
                         @Override
                         public void onTaskError(String error) {
-
+                            if(mErrorListener != null)
+                                mErrorListener.handleError(error);
+                            progress.setVisibility(View.GONE);
                         }
                     });
                     data.execute("/salesforce/events/venues?event_id=" + mEvent.getId());
@@ -279,13 +281,13 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
         }
 
         updateViews(getView());
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 }

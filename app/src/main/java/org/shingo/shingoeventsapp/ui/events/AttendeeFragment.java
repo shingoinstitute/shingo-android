@@ -59,13 +59,16 @@ public class AttendeeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         getActivity().setTitle("Attendees");
-        View view = inflater.inflate(R.layout.fragment_attendee_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_sentity_list, container, false);
 
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view;
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         Collections.sort(mEvents.getEvent(mEventId).getAttendees());
         recyclerView.setAdapter(new MySEntityRecyclerViewAdapter(mEvents.getEvent(mEventId).getAttendees()));
+        view.findViewById(R.id.progressBar).setVisibility(View.GONE);
+        if(mEvents.getEvent(mEventId).getAttendees().size() == 0)
+            view.findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
 
         return view;
     }

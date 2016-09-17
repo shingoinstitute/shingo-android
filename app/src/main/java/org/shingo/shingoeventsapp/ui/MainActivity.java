@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
@@ -23,7 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity
     private Date lastAffiliatePull;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private Menu mMenu;
     private Fragment mFragment;
     private int mToggle = 0;
     private ArrayList<SEvent> mEvents = new ArrayList<>();
@@ -135,7 +134,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -164,9 +162,8 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        if(item == null) return false;
         int id = item.getItemId();
         String eventId = "";
         if(mEvent != null)

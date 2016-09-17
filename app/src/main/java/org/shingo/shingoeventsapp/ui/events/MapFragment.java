@@ -3,7 +3,6 @@ package org.shingo.shingoeventsapp.ui.events;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
@@ -13,12 +12,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import org.shingo.shingoeventsapp.R;
@@ -115,7 +110,7 @@ public class MapFragment extends Fragment {
         getActivity().setTitle("Venue Map");
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        progress = (ProgressBar) view.findViewById(R.id.map_progress);
+        progress = (ProgressBar) view.findViewById(R.id.progressBar);
         if(map == null){
             progress.setVisibility(View.VISIBLE);
             DownloadImageTask downloadImageTask = new DownloadImageTask(((TouchImageView)view.findViewById(R.id.map)));

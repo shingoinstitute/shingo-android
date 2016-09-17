@@ -1,7 +1,5 @@
 package org.shingo.shingoeventsapp.ui;
 
-
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -42,7 +41,7 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
     private EditText mEmailView;
     private EditText mDescriptionView;
     private RatingBar mRatingBar;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     private OnErrorListener mErrorListener;
     private NavigationInterface mNavigate;
@@ -71,6 +70,8 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_feedback, container, false);
+        progress = (ProgressBar)view.findViewById(R.id.progressBar);
+        progress.setVisibility(View.GONE);
 
         view.findViewById(R.id.action_cancel).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,7 +163,7 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
             postData += "&" + DETAIL_PARAM + "=" + getDetails();
             postData += "&" + RATING_PARAM + "=" + rating;
             createFeedbackAsync.execute("/support/feedback", "", postData);
-            progress = ProgressDialog.show(getContext(), "Thanks for the feedback!", "Submitting...");
+            progress.setVisibility(View.VISIBLE);
         }
     }
 
@@ -179,7 +180,7 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                progress.dismiss();
+                progress.setVisibility(View.GONE);
                 Snackbar.make(getView(), "Feedback submitted", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Done", new View.OnClickListener() {
                             @Override
@@ -198,7 +199,7 @@ public class FeedbackFragment extends Fragment implements OnTaskCompleteListener
 
     @Override
     public void onTaskError(String error) {
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
         if(mErrorListener != null)
             mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your feedback. Please let us know at shingo.development@usu.edu!");
     }
