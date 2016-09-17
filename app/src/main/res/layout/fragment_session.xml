@@ -17,7 +17,7 @@
         android:animateLayoutChanges="true">
 
         <TextView
-            android:id="@+id/session_title"
+            android:id="@+id/session_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
@@ -26,12 +26,11 @@
             android:textSize="10pt"/>
 
         <TextView
-            android:id="@+id/session_time"
+            android:id="@+id/session_title"
             android:paddingStart="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem" />
-        <!-- TODO: Add room name and link to room -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -54,13 +53,27 @@
                 android:clickable="true"
                 android:visibility="visible" />
         </LinearLayout>
-        <TextView
-            android:id="@+id/session_summary"
-            android:visibility="gone"
+        <LinearLayout
+            android:id="@+id/expanded_view"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#000000"
-            android:padding="5dp"
-            android:animateLayoutChanges="true"/>
+            android:animateLayoutChanges="true">
+            <TextView
+                android:id="@+id/room"
+                android:visibility="gone"
+                android:drawableEnd="@drawable/ic_location_on"
+                android:drawablePadding="5dp"
+                android:gravity="center"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            <TextView
+                android:id="@+id/session_summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:padding="5dp"/>
+        </LinearLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>

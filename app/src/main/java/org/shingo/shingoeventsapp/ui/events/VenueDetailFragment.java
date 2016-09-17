@@ -1,7 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,9 +12,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -56,7 +54,7 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
     private EventInterface mEvents;
     private NavigationInterface mNavigation;
 
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
 
     public VenueDetailFragment() {
@@ -100,8 +98,9 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
             GetAsyncData getVenueAsync = new GetAsyncData(this);
             getVenueAsync.execute("/salesforce/events/venues/" + mVenueId);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Venue...");
+            progress = (ProgressBar)view.findViewById(R.id.progressBar);
         } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
             updateViews(view);
         }
         return view;
@@ -218,6 +217,7 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
             if(result.getBoolean("success")){
                 if(result.has("venue")){
                     mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY + mVenueId);
+                    mVenue.getMaps().clear();
                     mVenue.fromJSON(result.getJSONObject("venue").toString());
                 }
             }
@@ -226,12 +226,12 @@ public class VenueDetailFragment extends Fragment implements OnTaskCompleteListe
         }
 
         updateViews(getView());
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
         if(mErrorListener != null)
             mErrorListener.handleError(error);
     }

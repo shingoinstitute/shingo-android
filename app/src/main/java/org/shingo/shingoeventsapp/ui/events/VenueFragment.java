@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -43,7 +42,7 @@ public class VenueFragment extends Fragment implements OnTaskCompleteListener {
     private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -79,7 +78,9 @@ public class VenueFragment extends Fragment implements OnTaskCompleteListener {
             GetAsyncData getVenuesAsync = new GetAsyncData(this);
             getVenuesAsync.execute("/salesforce/events/venues", ARG_ID + "=" + mEventId);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Venues");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+        } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -152,7 +153,9 @@ public class VenueFragment extends Fragment implements OnTaskCompleteListener {
 
         Collections.sort(mEvents.getEvent(mEventId).getVenues());
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        if(mEvents.getEvent(mEventId).getExhibitors().isEmpty() && getView() != null)
+            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
         if(mEvents.getEvent(mEventId).getVenues().size() == 1)
             mListener.onListFragmentInteraction(mEvents.getEvent(mEventId).getVenues().get(0));
     }
@@ -161,6 +164,6 @@ public class VenueFragment extends Fragment implements OnTaskCompleteListener {
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 }

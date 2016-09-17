@@ -44,18 +44,33 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final boolean isExpanded = position == mExpandedPosition;
-        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.mExpandedView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource( isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mItem = mValues.get(position);
-        holder.mTitleView.setText(holder.mItem.getName());
+        holder.mTitleView.setText(String.format("%s: %s", holder.mItem.type, holder.mItem.getName()));
         holder.mTimeView.setText(holder.mItem.getTimeString());
-        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
-
+        if(holder.mItem.getRoom() != null) {
+            holder.mRoomView.setVisibility(View.VISIBLE);
+            holder.mRoomView.setText(String.format("Room: %s", holder.mItem.getRoom().getName()));
+            holder.mRoomView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mListener.onListFragmentInteraction(holder.mItem.getRoom());
+                }
+            });
+        } else {
+            holder.mRoomView.setVisibility(View.GONE);
+        }
         holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : holder.getAdapterPosition();
-                TransitionManager.beginDelayedTransition(mParent);
+                TransitionManager.beginDelayedTransition(mParent);TransitionManager.beginDelayedTransition(mParent);
+                if(!isExpanded)
+                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
+                else
+                    holder.mSummaryView.setText("");
+
                 notifyDataSetChanged();
             }
         });
@@ -88,6 +103,8 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         public final ImageView mExpandView;
         public final TextView mSummaryView;
         public final ImageView mSpeakersView;
+        public final TextView mRoomView;
+        public final View mExpandedView;
 
         public SSession mItem;
 
@@ -99,6 +116,8 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
             mExpandView = (ImageView) view.findViewById(R.id.expand_session);
             mSummaryView = (TextView) view.findViewById(R.id.session_summary);
             mSpeakersView = (ImageView) view.findViewById(R.id.session_speakers);
+            mRoomView = (TextView) view.findViewById(R.id.room);
+            mExpandedView = view.findViewById(R.id.expanded_view);
         }
 
         @Override

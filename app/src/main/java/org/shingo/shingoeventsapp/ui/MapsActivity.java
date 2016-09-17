@@ -16,7 +16,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public static final String ARG_PIN = "pin";
     public static final String ARG_TITLE = "title";
-    private GoogleMap mMap;
     private double[] mPin;
     private String mTitle;
 
@@ -47,7 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        GoogleMap mMap = googleMap;
 
         // Add marker at pin location and move and zoom camera to it
         LatLng location = new LatLng(mPin[0], mPin[1]);

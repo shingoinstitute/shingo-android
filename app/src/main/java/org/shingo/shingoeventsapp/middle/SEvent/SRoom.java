@@ -54,6 +54,9 @@ public class SRoom extends SEventObject implements Comparable<SObject>,Parcelabl
                 this.location[0] = x;
                 this.location[1] = y;
             }
+            if(jsonRoom.has("Associated_Venue__r")){
+                this.venueId = jsonRoom.getJSONObject("Associated_Venue__r").getString("Id");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

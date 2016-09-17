@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,7 +78,7 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
      */
     @Override
     protected void setTypeFromString(String type){
-        this.type = SPersonType.valueOf(type.replace("\\s", ""));
+        this.type = SPersonType.valueOf(type.replaceAll("\\s", ""));
     }
 
     /**
@@ -144,7 +145,7 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
      */
     @Override
     public String getDetail() {
-        return (title != null ? title + (company != null ? ", " + company : "") : company);
+        return (!title.equals("") ? title + (!company.equals("") ? ", " + company : "") : company);
     }
 
     /**

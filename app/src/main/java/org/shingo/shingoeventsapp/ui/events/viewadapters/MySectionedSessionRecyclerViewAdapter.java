@@ -1,12 +1,17 @@
 package org.shingo.shingoeventsapp.ui.events.viewadapters;
 
+import android.animation.LayoutTransition;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.afollestad.sectionedrecyclerview.SectionedRecyclerViewAdapter;
@@ -58,17 +63,31 @@ public class MySectionedSessionRecyclerViewAdapter extends SectionedRecyclerView
 
         final ItemViewHolder holder = (ItemViewHolder) vh;
         holder.mItem = (SSession)items.get(relativePosition);
-        holder.mTitleView.setText(holder.mItem.getName());
+        holder.mTitleView.setText(String.format("%s: %s", holder.mItem.type, holder.mItem.getName()));
         holder.mTimeView.setText(holder.mItem.getTimeString());
-        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
-        holder.mSummaryView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        if(holder.mItem.getRoom() != null) {
+            holder.mRoomView.setVisibility(View.VISIBLE);
+            holder.mRoomView.setText(String.format("Room: %s", holder.mItem.getRoom().getName()));
+            holder.mRoomView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mListener.onListFragmentInteraction(holder.mItem.getRoom());
+                }
+            });
+        } else {
+            holder.mRoomView.setVisibility(View.GONE);
+        }
         ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
-
+        holder.mExpandedView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : absolutePosition;
                 TransitionManager.beginDelayedTransition(mParent);
+                if(!isExpanded)
+                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
+                else
+                    holder.mSummaryView.setText("");
                 notifyDataSetChanged();
             }
         });
@@ -128,6 +147,8 @@ public class MySectionedSessionRecyclerViewAdapter extends SectionedRecyclerView
         public final ImageView mExpandView;
         public final TextView mSummaryView;
         public final ImageView mSpeakersView;
+        public final TextView mRoomView;
+        public final LinearLayout mExpandedView;
 
         public SSession mItem;
 
@@ -139,6 +160,8 @@ public class MySectionedSessionRecyclerViewAdapter extends SectionedRecyclerView
             mExpandView = (ImageView) view.findViewById(R.id.expand_session);
             mSummaryView = (TextView) view.findViewById(R.id.session_summary);
             mSpeakersView = (ImageView) view.findViewById(R.id.session_speakers);
+            mRoomView = (TextView) view.findViewById(R.id.room);
+            mExpandedView = (LinearLayout) view.findViewById(R.id.expanded_view);
         }
 
         @Override

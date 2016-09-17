@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -50,7 +49,7 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
     private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -101,15 +100,18 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
         SEvent event = mEvents.getEvent(mEventId);
         if(mSpeakerIds != null && event.hasCache(CACHE_KEY)){
             mAdapter = new MySEntityRecyclerViewAdapter(event.getSpeakers(mSpeakerIds));
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         } else if(event.needsUpdated(CACHE_KEY)){
             GetAsyncData getSpeakersAsync = new GetAsyncData(this);
             getSpeakersAsync.execute("/salesforce/events/speakers", mSessionId == null ? ARG_EVENT_ID + "=" +mEventId : ARG_SESSION_ID + "=" + mSessionId);
             mAdapter = isSectioned ? new MySectionedSEntityRecyclerViewAdapter(data) : new MySEntityRecyclerViewAdapter(event.getSpeakers());
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Speakers...");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+            progress.setVisibility(View.VISIBLE);
         } else {
             sectionSpeakers(event.getSpeakers());
             mAdapter = new MySectionedSEntityRecyclerViewAdapter(data);
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -181,16 +183,18 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
 
         if(isSectioned)
             sectionSpeakers(mEvents.getEvent(mEventId).getSpeakers());
+        if(mEvents.getEvent(mEventId).getSpeakers().size() == 0 && getView() != null)
+            getView().findViewById(R.id.empty_entity);
 
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     private void sectionSpeakers(List<SPerson> speakers){

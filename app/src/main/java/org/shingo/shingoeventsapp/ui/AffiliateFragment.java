@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,9 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
@@ -38,7 +37,7 @@ public class AffiliateFragment extends Fragment implements OnTaskCompleteListene
     private AffiliateInterface mAffiliates;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -69,7 +68,9 @@ public class AffiliateFragment extends Fragment implements OnTaskCompleteListene
             GetAsyncData getAffiliatesAsync = new GetAsyncData(this);
             getAffiliatesAsync.execute("/salesforce/affiliates");
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Affiliates...");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+        } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         Context context = view.getContext();
@@ -147,13 +148,13 @@ public class AffiliateFragment extends Fragment implements OnTaskCompleteListene
 
         mAffiliates.sortAffiliates();
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 }

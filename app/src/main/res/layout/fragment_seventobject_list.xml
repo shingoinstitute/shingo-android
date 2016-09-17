@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:gravity="center"
-        android:text="@string/empty_object"
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="match_parent"
+        android:indeterminate="true"
         android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.Holo.SearchResult.Title"/>
+        android:layout_marginTop="-6dp"
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"/>
 
-    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/list"
-        android:name="org.shingo.shingoapp.ui.events.*"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_below="@+id/progressBar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:background="?android:colorBackground"
-        app:layoutManager="LinearLayoutManager"
-        tools:context="org.shingo.shingoeventsapp.ui.events.*"
-        tools:listitem="@layout/fragment_sentity"/>
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+        <TextView
+            android:id="@+id/empty_entity"
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="@string/empty_object"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Holo.SearchResult.Title"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:name="org.shingo.shingoapp.ui.events.*"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="?android:colorBackground"
+            app:layoutManager="LinearLayoutManager"
+            tools:context="org.shingo.shingoeventsapp.ui.events.*"
+            tools:listitem="@layout/fragment_sentity"/>
+    </RelativeLayout>
+
 </RelativeLayout>

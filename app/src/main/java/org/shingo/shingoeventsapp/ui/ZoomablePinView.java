@@ -57,8 +57,8 @@ public class ZoomablePinView extends ImageView{
         setLayoutParams(layoutParams);
     }
 
+    @SuppressWarnings("unused")
     public PointF getPositionInPixels() {
-        PointF pinPos = new PointF(posXInPixels, posYInPixels);
-        return pinPos;
+        return new PointF(posXInPixels, posYInPixels);
     }
 }

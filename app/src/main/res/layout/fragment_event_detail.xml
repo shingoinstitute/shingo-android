@@ -8,6 +8,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:indeterminate="true"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-6dp"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"/>
 
         <android.support.v7.widget.CardView
             xmlns:card_view="http://schemas.android.com/apk/res-auto"

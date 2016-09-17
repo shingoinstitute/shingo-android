@@ -1,7 +1,5 @@
 package org.shingo.shingoeventsapp.ui;
 
-
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -39,7 +38,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
 
     private EditText mEmailView;
     private EditText mDescriptionView;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     private OnErrorListener mErrorListener;
     private NavigationInterface mNavigate;
@@ -68,6 +67,8 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bug, container, false);
+        progress = (ProgressBar)view.findViewById(R.id.progressBar);
+        progress.setVisibility(View.GONE);
 
         view.findViewById(R.id.action_cancel).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,7 +161,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
             postData += "&" + DEVICE_PARAM + "=" + Build.DEVICE;
             postData += "&" + DETAIL_PARAM + "=" + getDetails();
             createBugAsync.execute("/support/bugs", "", postData);
-            progress = ProgressDialog.show(getContext(), "Bug Report", "Submitting...");
+            progress.setVisibility(View.VISIBLE);
         }
     }
 
@@ -177,7 +178,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
         try {
             JSONObject result = new JSONObject(response);
             if(result.getBoolean("success")){
-                progress.dismiss();
+                progress.setVisibility(View.GONE);
                 Snackbar.make(getView(), "Report submitted", Snackbar.LENGTH_LONG)
                         .setAction("Done", new View.OnClickListener() {
                             @Override
@@ -190,7 +191,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            progress.dismiss();
+            progress.setVisibility(View.GONE);
             onTaskError("");
         }
     }
@@ -199,7 +200,7 @@ public class BugFragment extends Fragment implements OnTaskCompleteListener {
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError("Well this is embarrassing... We had trouble submitting your bug report. Please let us know at shingo.development@usu.edu!");
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 
     private void closeKeyboard(){

@@ -1,6 +1,5 @@
 package org.shingo.shingoeventsapp.ui.events;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,16 +11,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shingo.shingoeventsapp.R;
 import org.shingo.shingoeventsapp.data.GetAsyncData;
 import org.shingo.shingoeventsapp.data.OnTaskCompleteListener;
 import org.shingo.shingoeventsapp.middle.SEntity.SOrganization;
 import org.shingo.shingoeventsapp.ui.events.viewadapters.MySEntityRecyclerViewAdapter;
-import org.shingo.shingoeventsapp.ui.interfaces.CacheInterface;
 import org.shingo.shingoeventsapp.ui.interfaces.OnErrorListener;
 import org.shingo.shingoeventsapp.ui.interfaces.EventInterface;
 
@@ -38,7 +36,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
     private EventInterface mEvents;
 
     private RecyclerView.Adapter mAdapter;
-    private ProgressDialog progress;
+    private ProgressBar progress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -75,7 +73,9 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
             GetAsyncData getExhibitorsAsync = new GetAsyncData(this);
             getExhibitorsAsync.execute("/salesforce/events/exhibitors", ARG_ID + "=" + mEventId);
 
-            progress = ProgressDialog.show(getContext(), "", "Loading Exhibitors");
+            progress = (ProgressBar) view.findViewById(R.id.progressBar);
+        } else {
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
 
         mAdapter = new MySEntityRecyclerViewAdapter(mEvents.getEvent(mEventId).getExhibitors());
@@ -133,6 +133,7 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
                     mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
                     for(int i = 0; i < jExhibitors.length(); i++){
                         SOrganization org = new SOrganization();
+                        jExhibitors.getJSONObject(i).getJSONObject("Organization__r").put("Id", jExhibitors.getJSONObject(i).getString("Id"));
                         org.fromJSON(jExhibitors.getJSONObject(i).getJSONObject("Organization__r").toString());
                         org.type = SOrganization.SOrganizationType.Exhibitor;
                         mEvents.getEvent(mEventId).getExhibitors().add(org);
@@ -144,13 +145,15 @@ public class ExhibitorFragment extends Fragment implements OnTaskCompleteListene
         }
 
         mAdapter.notifyDataSetChanged();
-        progress.dismiss();
+        if(mEvents.getEvent(mEventId).getExhibitors().isEmpty() && getView() != null)
+            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
     }
 
     @Override
     public void onTaskError(String error) {
         if(mErrorListener != null)
             mErrorListener.handleError(error);
-        progress.dismiss();
+        progress.setVisibility(View.GONE);
     }
 }
