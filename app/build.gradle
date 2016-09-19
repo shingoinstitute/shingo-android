@@ -32,8 +32,8 @@ android {
         applicationId "org.shingo.shingoeventsapp"
         minSdkVersion 19
         targetSdkVersion 24
-        versionCode 17
-        versionName '2.0'
+        versionCode 18
+        versionName '2.1'
         multiDexEnabled true
     }
     buildTypes {

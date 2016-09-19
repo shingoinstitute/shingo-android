@@ -105,14 +105,15 @@ public abstract class SObject implements Comparable<SObject> {
 
     /**
      * Parses a {@link String} into a {@link Date}
-     * @param dateTime {@link String} representing a date and time of format "yyyy-MM-dd'T'hh:mm:ss.SSS"
+     * @param dateTime {@link String} representing a date and time of format "yyyy-MM-dd'T'HH:mm:ss.SSS"
      * @return {@link Date}
      * @throws ParseException
      */
     protected Date parseDateTimeString(String dateTime) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS", Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return format.parse(dateTime);
+        Date date = format.parse(dateTime);
+        return date;
     }
 
     /**
@@ -122,7 +123,7 @@ public abstract class SObject implements Comparable<SObject> {
      * @throws ParseException
      */
     protected Date parseDateString(String date) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.parse(date);
     }

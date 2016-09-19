@@ -1,6 +1,7 @@
 package org.shingo.shingoeventsapp.ui.events.viewadapters;
 
 import android.animation.LayoutTransition;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.transition.Transition;
@@ -79,15 +80,12 @@ public class MySectionedSessionRecyclerViewAdapter extends SectionedRecyclerView
         }
         ((ImageView)holder.mView.findViewById(R.id.expand_session)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
         holder.mExpandedView.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.mSummaryView.setText( Html.fromHtml("<p>" + holder.mItem.getSummary().substring(0, holder.mItem.getSummary().length() > 3000 ? 3000 : holder.mItem.getSummary().length() - 1) + "</p>"));
         holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : absolutePosition;
                 TransitionManager.beginDelayedTransition(mParent);
-                if(!isExpanded)
-                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
-                else
-                    holder.mSummaryView.setText("");
                 notifyDataSetChanged();
             }
         });

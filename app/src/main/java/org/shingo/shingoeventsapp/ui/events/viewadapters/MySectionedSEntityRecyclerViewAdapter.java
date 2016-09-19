@@ -65,15 +65,12 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
         holder.mDetailView.setText(holder.mItem.getDetail());
         holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
         holder.mView.findViewById(R.id.expanded_entity_view).setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.mSummaryView.setText( Html.fromHtml("<p>" + holder.mItem.getSummary().substring(0, holder.mItem.getSummary().length() > 3000 ? 3000 : holder.mItem.getSummary().length() - 1) + "</p>"));
         holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : absolutePosition;
                 TransitionManager.beginDelayedTransition(mParent);
-                if(!isExpanded)
-                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
-                else
-                    holder.mSummaryView.setText("");
                 notifyDataSetChanged();
             }
         });

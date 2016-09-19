@@ -61,16 +61,12 @@ public class MySessionRecyclerViewAdapter extends RecyclerView.Adapter<MySession
         } else {
             holder.mRoomView.setVisibility(View.GONE);
         }
+        holder.mSummaryView.setText( Html.fromHtml("<p>" + holder.mItem.getSummary().substring(0, holder.mItem.getSummary().length() > 3000 ? 3000 : holder.mItem.getSummary().length() - 1) + "</p>"));
         holder.mExpandView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1 : holder.getAdapterPosition();
-                TransitionManager.beginDelayedTransition(mParent);TransitionManager.beginDelayedTransition(mParent);
-                if(!isExpanded)
-                    holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary() + "</p>"));
-                else
-                    holder.mSummaryView.setText("");
-
+                TransitionManager.beginDelayedTransition(mParent);
                 notifyDataSetChanged();
             }
         });

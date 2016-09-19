@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * This class holds data for
@@ -79,7 +80,7 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
                     speakers.add(jSpeakers.getJSONObject(i).getJSONObject("Speaker__r").getString("Id"));
             }
             if(jsonSession.has("Session_Type__c"))
-                this.type = (jsonSession.isNull("Session_Type__c") ? SSessionType.Concurrent : SSessionType.valueOf(jsonSession.getString("Session_Type__c").replaceAll("\\s", "")));
+                this.type = (jsonSession.isNull("Session_Type__c") ? SSessionType.Concurrent : SSessionType.valueOf(jsonSession.getString("Session_Type__c").replaceAll("\\s", "").replaceAll("-", "")));
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
@@ -128,7 +129,8 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
 
     public String getTimeString() {
         String timeString = "";
-        DateFormat formatter = SimpleDateFormat.getTimeInstance();
+        DateFormat formatter = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT);
+        formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         timeString += formatter.format(start) + " - " + formatter.format(end);
         return timeString;
     }
@@ -141,7 +143,8 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
         Meal("Meal"),
         HalfDayWorkshop("Half Day Workshop"),
         FullDayWorkshop("Full Day Workshop"),
-        Social("Social");
+        Social("Social"),
+        Break("Break");
 
         private String type;
         SSessionType(String type){

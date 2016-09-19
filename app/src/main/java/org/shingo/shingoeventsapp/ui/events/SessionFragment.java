@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * A fragment representing a list of {@link SSession}s.
@@ -181,6 +183,8 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
                 if(result.has("sessions")) {
                     JSONArray jSessions = result.getJSONArray("sessions");
                     for (int i = 0; i < jSessions.length(); i++) {
+                        if(jSessions.getJSONObject(i).getString("Id").equals("a1L12000003G3VcEAK"))
+                            Log.d("Random log", jSessions.getJSONObject(i).toString(4));
                         SSession session = new SSession();
                         session.fromJSON(jSessions.getJSONObject(i).toString());
                         mEvents.getEvent(mEventId).getSessions().add(session);
@@ -237,7 +241,8 @@ public class SessionFragment extends Fragment implements OnTaskCompleteListener 
     }
 
     private String getDayFromDate(Date date){
-        SimpleDateFormat formatter = new SimpleDateFormat("EEEE", Locale.getDefault());
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        formatter.setTimeZone(TimeZone.getTimeZone("America/Denver"));
         return formatter.format(date);
     }
 
