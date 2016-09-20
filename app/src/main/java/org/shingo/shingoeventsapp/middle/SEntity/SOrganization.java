@@ -123,7 +123,7 @@ public class SOrganization extends SEntity implements Comparable<SObject>, Parce
      */
     @Override
     protected void setTypeFromString(String type) {
-        this.type = SOrganizationType.valueOf(type.replace("\\s",""));
+        this.type = SOrganizationType.valueOf(type.replaceAll("\\s",""));
     }
 
     /**
@@ -151,6 +151,15 @@ public class SOrganization extends SEntity implements Comparable<SObject>, Parce
     @SuppressWarnings("unused")
     public String getPhone(){
         return phone;
+    }
+
+
+    /**
+     * Getter for {@link #shingoPath}
+     * @return {@link #shingoPath}
+     */
+    public String getShingoPath() {
+        return shingoPath;
     }
 
     /**
