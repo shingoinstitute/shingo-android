@@ -10,7 +10,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+/* Some other file
+...
 
+SObject obj = new SObject();
+...
 /**
  * This is the base class for events Shingo SF Objects.
  *

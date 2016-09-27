@@ -153,6 +153,7 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
             Bitmap bitmap = null;
             try {
                 InputStream in = new java.net.URL(url).openStream();
+
                 bitmap = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
