@@ -6,11 +6,12 @@ android:
     - tools
     - tools
     - platform-tools
-    - build-tools-24.0.2
+    - build-tools-24.4.1
     - android-24
   licenses:
     - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
+    - 'android-sdk-license-5be876d5'
+    - 'android-sdk-license-c81a61d9'
     - 'google-gdk-license-.+'
 script:
   - ./gradlew connectedCheck
