@@ -142,13 +142,14 @@ public class AffiliateFragment extends Fragment implements OnTaskCompleteListene
                     }
                 }
             }
+
+
+            mAffiliates.sortAffiliates();
+            mAdapter.notifyDataSetChanged();
+            progress.setVisibility(View.GONE);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        mAffiliates.sortAffiliates();
-        mAdapter.notifyDataSetChanged();
-        progress.setVisibility(View.GONE);
     }
 
     @Override

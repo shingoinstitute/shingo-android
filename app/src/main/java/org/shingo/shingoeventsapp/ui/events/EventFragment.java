@@ -144,16 +144,17 @@ public class EventFragment extends Fragment implements OnTaskCompleteListener {
                     }
                 }
             }
+
+
+            mEvents.sortEvents();
+            mAdapter.notifyDataSetChanged();
+            if(mEvents.events().size() == 0 && getView() != null)
+                getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
+
+            progress.setVisibility(View.GONE);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        mEvents.sortEvents();
-        mAdapter.notifyDataSetChanged();
-        if(mEvents.events().size() == 0 && getView() != null)
-            getView().findViewById(R.id.empty_entity).setVisibility(View.VISIBLE);
-
-        progress.setVisibility(View.GONE);
     }
 
     @Override

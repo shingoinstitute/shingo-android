@@ -130,7 +130,7 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
     public String getTimeString() {
         String timeString = "";
         DateFormat formatter = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT);
-        formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        formatter.setTimeZone(TimeZone.getTimeZone("America/Denver"));
         timeString += formatter.format(start) + " - " + formatter.format(end);
         return timeString;
     }
