@@ -65,7 +65,7 @@ public abstract class SEntity extends SObject {
      * Getter for {@link #imageUrl}
      * @return {@link #imageUrl}
      */
-    public String getImageUrl() { return imageUrl != null ? imageUrl : "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png"; }
+    public String getImageUrl() { return imageUrl != null ? imageUrl : "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_100,w_100/v1414874243/silhouette_vzugec.png"; }
 
     /**
      * Getter for {@link #summary}
@@ -85,7 +85,7 @@ public abstract class SEntity extends SObject {
         try {
             JSONObject jsonEntity = new JSONObject(json);
             if(jsonEntity.has("List_of_Photos__c"))
-                this.imageUrl = jsonEntity.isNull("List_of_Photos__c") ? "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png" : jsonEntity.getString("List_of_Photos__c").split("\\^")[0];
+                this.imageUrl = jsonEntity.isNull("List_of_Photos__c") ? "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_100,w_100/v1414874243/silhouette_vzugec.png" : jsonEntity.getString("List_of_Photos__c").split("\\^")[0];
             else if(jsonEntity.has("Picture_URL__c"))
                 this.imageUrl = jsonEntity.isNull("Picture_URL__c") ? "http://res.cloudinary.com/shingo/image/upload/c_fill,g_center,h_300,w_300/v1414874243/silhouette_vzugec.png" : jsonEntity.getString("Picture_URL__c");
             else if(jsonEntity.has("Logo__c"))

@@ -92,6 +92,7 @@ public class SSponsor extends SOrganization implements Comparable<SObject> {
     }
 
     public enum SSponsorLevel{
+        Other,
         Friend,
         Supporter,
         Benefactor,

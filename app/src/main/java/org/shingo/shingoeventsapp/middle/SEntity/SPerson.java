@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -145,7 +146,7 @@ public class SPerson extends SEntity implements Comparable<SObject>,Parcelable {
      */
     @Override
     public String getDetail() {
-        return (!title.equals("") ? title + (!company.equals("") ? ", " + company : "") : company);
+        return (!TextUtils.isEmpty(title) ? title + (!TextUtils.isEmpty(company) ? ", " + company : "") : company);
     }
 
     /**
