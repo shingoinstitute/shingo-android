@@ -13,6 +13,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <android.support.percent.PercentFrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/splash_ad"
+            android:visibility="invisible"
+            app:layout_aspectRatio="50%"
+            app:layout_widthPercent="100%"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="center"
+            android:contentDescription="@string/banner_ad"
+            app:srcCompat="@color/colorAccent" />
+    </android.support.percent.PercentFrameLayout>
+
+
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

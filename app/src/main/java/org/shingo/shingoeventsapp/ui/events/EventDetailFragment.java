@@ -2,6 +2,7 @@ package org.shingo.shingoeventsapp.ui.events;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
@@ -84,7 +85,8 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_detail, container, false);
-        MainActivity mainActivity = (MainActivity) getActivity();
+        final MainActivity mainActivity = (MainActivity) getActivity();
+
 
         mEvent = mEvents.getEvent(mEventId);
 
@@ -106,6 +108,14 @@ public class EventDetailFragment extends Fragment implements OnTaskCompleteListe
 
         mainActivity.setTitle(mEvent.getName());
         mainActivity.toggleNavHeader(1);
+        mainActivity.toggleBanner(mEvent.getId(), View.VISIBLE);
+        mainActivity.toggleSplash(mEventId, View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.toggleSplash(mEventId, View.INVISIBLE);
+            }
+        }, 2000);
         return view;
     }
 

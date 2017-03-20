@@ -168,11 +168,13 @@ public class SpeakerFragment extends Fragment implements OnTaskCompleteListener 
                 mEvents.getEvent(mEventId).getSpeakers().clear();
                 if(mSessionId == null)
                     mEvents.getEvent(mEventId).updatePullTime(CACHE_KEY);
-                JSONArray jSpeakers = result.getJSONArray("speakers");
-                for(int i = 0; i < jSpeakers.length(); i++){
-                    SPerson speaker = new SPerson();
-                    speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
-                    mEvents.getEvent(mEventId).getSpeakers().add(speaker);
+                if(!result.isNull("speakers")){
+                    JSONArray jSpeakers = result.getJSONArray("speakers");
+                    for(int i = 0; i < jSpeakers.length(); i++){
+                        SPerson speaker = new SPerson();
+                        speaker.fromJSON(jSpeakers.getJSONObject(i).toString());
+                        mEvents.getEvent(mEventId).getSpeakers().add(speaker);
+                    }
                 }
             }
         } catch (Exception e) {

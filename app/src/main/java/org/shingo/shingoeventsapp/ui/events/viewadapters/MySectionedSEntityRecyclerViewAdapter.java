@@ -56,30 +56,34 @@ public class MySectionedSEntityRecyclerViewAdapter extends SectionedRecyclerView
     @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder vh, int section, int relativePosition, final int absolutePosition) {
-        List<? extends SObject> items = mData.get(section).getItems();
-        final boolean isExpanded = absolutePosition == mExpandedPosition;
-        final ItemViewHolder holder = (ItemViewHolder) vh;
-        ((ImageView)holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
-        holder.mItem = (SEntity)items.get(relativePosition);
-        holder.mNameView.setText(holder.mItem.getName());
-        holder.mDetailView.setText(holder.mItem.getDetail());
-        holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
-        holder.mView.findViewById(R.id.expanded_entity_view).setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-        holder.mSummaryView.setText( Html.fromHtml("<p>" + holder.mItem.getSummary().substring(0, holder.mItem.getSummary().length() > 3000 ? 3000 : holder.mItem.getSummary().length() - 1) + "</p>"));
-        holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mExpandedPosition = isExpanded ? -1 : absolutePosition;
-                TransitionManager.beginDelayedTransition(mParent);
-                notifyDataSetChanged();
+        try {
+            List<? extends SObject> items = mData.get(section).getItems();
+            final boolean isExpanded = absolutePosition == mExpandedPosition;
+            final ItemViewHolder holder = (ItemViewHolder) vh;
+            ((ImageView) holder.mView.findViewById(R.id.expand_entity_summary)).setImageResource(isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more);
+            holder.mItem = (SEntity) items.get(relativePosition);
+            holder.mNameView.setText(holder.mItem.getName());
+            holder.mDetailView.setText(holder.mItem.getDetail());
+            holder.mSummaryView.setText(Html.fromHtml(holder.mItem.getSummary()));
+            holder.mView.findViewById(R.id.expanded_entity_view).setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+            holder.mSummaryView.setText(Html.fromHtml("<p>" + holder.mItem.getSummary().substring(0, holder.mItem.getSummary().length() > 3000 ? 3000 : holder.mItem.getSummary().length() - 1) + "</p>"));
+            holder.mView.findViewById(R.id.expand_entity_summary).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mExpandedPosition = isExpanded ? -1 : absolutePosition;
+                    TransitionManager.beginDelayedTransition(mParent);
+                    notifyDataSetChanged();
+                }
+            });
+            if (holder.mItem.getImage() == null) {
+                holder.mPictureView.setVisibility(View.INVISIBLE);
+                DownloadImageTask downloadImageTask = new DownloadImageTask(holder.mPictureView, holder.mItem);
+                downloadImageTask.execute(holder.mItem.getImageUrl());
+            } else {
+                holder.mPictureView.setImageBitmap(holder.mItem.getImage());
             }
-        });
-        if(holder.mItem.getImage() == null) {
-            holder.mPictureView.setVisibility(View.INVISIBLE);
-            DownloadImageTask downloadImageTask = new DownloadImageTask(holder.mPictureView, holder.mItem);
-            downloadImageTask.execute(holder.mItem.getImageUrl());
-        } else {
-            holder.mPictureView.setImageBitmap(holder.mItem.getImage());
+        } catch(Exception ex){
+            Log.e("EXCEPTION", "Caught an exception...", ex);
         }
     }
 

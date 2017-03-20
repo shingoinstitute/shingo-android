@@ -143,8 +143,10 @@ public class SSession extends SEventObject implements Comparable<SObject>,Parcel
         Meal("Meal"),
         HalfDayWorkshop("Half Day Workshop"),
         FullDayWorkshop("Full Day Workshop"),
+        MultiDayWorkshop("Multi-Day Workshop"),
         Social("Social"),
-        Break("Break");
+        Break("Break"),
+        Other("Other");
 
         private String type;
         SSessionType(String type){

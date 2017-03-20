@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,6 +40,9 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
     private String bannerUrl;
     private String salesText;
     private Bitmap banner;
+    private Random random = new Random();
+    private List<Bitmap> bannerAds = new ArrayList<>();
+    private List<Bitmap> splashAds = new ArrayList<>();
     private List<SDay> agenda = new ArrayList<>();
     private List<SPerson> speakers = new ArrayList<>();
     private List<SPerson> attendees = new ArrayList<>();
@@ -172,6 +176,26 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
         return venues;
     }
 
+    public List<Bitmap> getBannerAds() {
+        return bannerAds;
+    }
+
+    public void addBannerAd(Bitmap bannerAd) {
+        this.bannerAds.add(bannerAd);
+    }
+
+    public List<Bitmap> getSplashAds() {
+        return splashAds;
+    }
+
+    public Bitmap getSplashAd(){
+        return splashAds.get(random.nextInt(splashAds.size()));
+    }
+
+    public void addSplashAd(Bitmap splashAd) {
+        this.splashAds.add(splashAd);
+    }
+
     @Override
     public int compareTo(@NonNull SObject a){
         if(!(a instanceof SEvent))
@@ -231,6 +255,7 @@ public class SEvent extends SEventObject implements Comparable<SObject>,Parcelab
                     attendees.add(person);
                 }
             }
+
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }

@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +25,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -100,7 +104,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_home));
         }
-
     }
 
     @Override
@@ -160,14 +163,69 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void setBannerAd(final SEvent event, final int index){
+        Log.d("BANNER_ADS", "Rotating banner with index " + index + " mod " + event.getBannerAds().size());
+        final ImageView ad = (ImageView)findViewById(R.id.banner_ad);
+        ad.setImageBitmap(event.getBannerAds().get(index % event.getBannerAds().size()));
+        View f = findViewById(R.id.fragment_container);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        params.setMargins(0, 0, 0, ad.getLayoutParams().height + 10);
+        f.setLayoutParams(params);
+        ad.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(ad.getVisibility() == View.VISIBLE && event.getBannerAds().size() > 1) setBannerAd(event, index + 1);
+            }
+        }, 4000);
+    }
+
+    public void toggleBanner(String eventId, int visibility){
+        if(visibility == View.INVISIBLE){
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+            findViewById(R.id.fragment_container).setLayoutParams(params);
+            findViewById(R.id.banner_ad).setVisibility(visibility);
+            return;
+        }
+
+        for(SEvent event : mEvents){
+            if(event.getId().equals(eventId) && event.getBannerAds().size() > 0){
+                setBannerAd(event, 0);
+                return;
+            }
+        }
+    }
+
+    public void toggleSplash(String eventId, int visibility){
+        ImageView v = (ImageView)findViewById(R.id.splash_ad);
+        for(SEvent event : mEvents){
+            if(event.getId().equals(eventId) && event.getSplashAds().size() > 0){
+                v.setImageBitmap(event.getSplashAd());
+                View f = findViewById(R.id.fragment_container);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                if(visibility == View.VISIBLE && v.getVisibility() != visibility) {
+                    params.setMargins(0, 0, 0, v.getLayoutParams().height);
+                    f.setLayoutParams(params);
+                } else if(visibility == View.INVISIBLE && v.getVisibility() != visibility){
+                    f.setLayoutParams(params);
+                }
+                v.setVisibility(visibility);
+                return;
+            }
+        }
+        if(visibility == View.INVISIBLE) v.setVisibility(visibility);
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        String eventId = "";
+        final String eventId;
         if(mEvent != null)
             eventId = mEvent.getId();
+        else
+            eventId = "";
 
         switch (id) {
             case R.id.nav_detail:
@@ -249,7 +307,7 @@ public class MainActivity extends AppCompatActivity
         if(getSupportFragmentManager().findFragmentByTag(fragment.getClass().getName()) != null)
             getSupportFragmentManager().popBackStackImmediate(fragment.getClass().getName(),FragmentManager.POP_BACK_STACK_INCLUSIVE);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_content, fragment, fragment.getClass().getName())
+                .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                 .addToBackStack(fragment.getClass().getName())
                 .commit();
     }
@@ -265,6 +323,7 @@ public class MainActivity extends AppCompatActivity
                 header.findViewById(R.id.nav_header).setBackground(new ColorDrawable(getResources().getColor(R.color.colorPrimaryDark)));
                 ((TextView) header.findViewById(R.id.nav_header_title)).setText(getString(R.string.name));
                 ((TextView) header.findViewById(R.id.nav_header_detail)).setText(getString(R.string.web_addr));
+                toggleBanner("", View.INVISIBLE);
                 break;
             case 1:
                 if(mEvents.size() == 0) break;
@@ -355,6 +414,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void sortEvents() {
         Collections.sort(mEvents);
+    }
+
+    @Override
+    public void addAd(String id, int type, Bitmap ad) {
+        for(SEvent event : mEvents){
+            if(event.getId().equals(id)){
+                if(type == 0){
+                    event.addSplashAd(ad);
+                } else {
+                    event.addBannerAd(ad);
+                }
+            }
+        }
     }
 
     @Override

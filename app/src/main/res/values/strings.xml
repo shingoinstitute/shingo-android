@@ -24,4 +24,13 @@
     <string name="prompt_email">Email…</string>
     <string name="prompt_rating">Rating:</string>
     <string name="prompt_comment">Comments</string>
+    <string name="banner_ad">Banner ad</string>
+    <string name="attendees_title">Attendees</string>
+    <string name="venues_title">Venues</string>
+    <string name="sponsors_title">Sponsors</string>
+    <string name="recipients_title">Recipients</string>
+    <string name="exhibitors_title">Exhibitors</string>
+    <string name="speakers_title">Speakers</string>
+    <string name="sessions_title">Sessions</string>
+    <string name="agenda_title">Agenda</string>
 </resources>
